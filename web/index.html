@@ -1,0 +1,864 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="color-scheme" content="dark light"><meta name="theme-color" content="#0b0a10"><title>Dome Launcher</title>
+<style>
+:root{/* valores por defecto (modo oscuro violeta); aplicarTema() los recalcula */
+--bg:#0b0a10;--panel:#14121c;--in:var(--in);--bg-rgb:11 10 16;--panel-rgb:20 18 28;--in-rgb:13 12 20;--fg:255 255 255;
+--linea:#2a2638;--txt:#f1eefb;--tenue:#9a94b3;--ac:#8b5cf6;--ac2:#a78bfa;--ac-rgb:139 92 246;--on-ac:#fff;
+--grad:linear-gradient(135deg,#8b5cf6,#a78bfa);--err:var(--err);--warn:var(--warn);--vel:1;--blur:0px;color-scheme:dark;accent-color:var(--ac);
+--ease:cubic-bezier(.2,.8,.2,1);--vx:50%;--vy:50%;font-family:"Bahnschrift","Segoe UI Variable Display","Segoe UI",sans-serif}
+*{box-sizing:border-box;margin:0}html,body{height:100%;background:var(--bg);color:var(--txt);overflow:hidden;user-select:none}
+button,input{font:inherit;color:inherit}
+.bg{position:absolute;inset:0;overflow:hidden;background:var(--bg)}
+.bg .img{position:absolute;inset:0;background:var(--fondo,url(bg.png)) center/cover;transform:scale(1.06);filter:blur(var(--blur));animation:zoom 24s ease-in-out infinite alternate}
+[data-fondo=none] .bg .img,[data-modo=oled][data-fondo=default] .bg .img{display:none}
+[data-fondo=custom] .bg .img{animation:none;transform:scale(1.08)}   /* sin zoom: así un GIF se ve limpio */
+.bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgb(var(--bg-rgb)/calc(.95*var(--vel))) 8%,rgb(var(--bg-rgb)/calc(.6*var(--vel))) 55%,rgb(var(--bg-rgb)/calc(.4*var(--vel)))),linear-gradient(0deg,rgb(var(--bg-rgb)/calc(.35 + .65*var(--vel))) 0,transparent 40%)}
+@keyframes zoom{to{transform:scale(1.14) translate(-1%,-1%)}}
+/* ---- barra superior (arrastrable) ---- */
+.top{position:absolute;top:0;left:0;right:0;height:38px;display:flex;justify-content:flex-end;align-items:center;gap:2px;padding-right:8px;z-index:20}
+.top button{width:34px;height:26px;border:0;background:none;border-radius:6px;color:var(--tenue);cursor:pointer}
+.top button:hover{background:rgb(var(--fg)/.08);color:var(--txt)}.top .x:hover{background:#e5484d;color:#fff}
+/* ---- login ---- */
+#login{position:absolute;inset:0;z-index:10}
+#login .card{position:absolute;left:0;top:0;bottom:0;width:340px;background:var(--panel);border-right:1px solid var(--linea);display:flex;flex-direction:column;justify-content:center;padding:0 40px;gap:14px;animation:entra .7s var(--ease) both}
+@keyframes entra{from{transform:translateX(-100%)}}
+.logo{font-size:34px;font-weight:700;letter-spacing:-.5px}.logo span{color:var(--tenue);font-weight:400}
+.card p{color:var(--tenue);font-size:13px;margin-bottom:14px}
+.card input{height:46px;border-radius:10px;border:1px solid var(--linea);background:var(--in);padding:0 14px;outline:0;transition:border-color .2s,box-shadow .2s}
+.card input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgb(var(--ac-rgb)/.20)}.card input.err{border-color:#e5484d;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.btn{height:46px;border:0;border-radius:10px;background:var(--grad);color:var(--on-ac);font-weight:700;cursor:pointer;transition:transform .15s,background .2s}
+.btn:not(.sec):hover{filter:brightness(1.12)}.btn:active{transform:scale(.97)}
+.card>*{animation:sube .6s var(--ease) both}.card>:nth-child(2){animation-delay:.12s}.card>:nth-child(3){animation-delay:.2s}.card>:nth-child(4){animation-delay:.28s}
+@keyframes sube{from{opacity:0;transform:translateY(14px)}}
+/* ---- app ---- */
+#app{position:absolute;inset:0;display:none}
+.side{position:absolute;left:0;top:0;bottom:0;width:64px;background:rgb(var(--in-rgb)/.80);backdrop-filter:blur(14px);border-right:1px solid var(--linea);display:flex;flex-direction:column;align-items:center;padding:52px 0 18px;gap:10px;z-index:5}
+.side button{position:relative;width:42px;height:42px;border-radius:12px;border:0;background:none;color:var(--tenue);cursor:pointer;transition:color .2s,background .2s}
+.side button:hover{background:rgb(var(--fg)/.07);color:var(--txt)}.side button.on{color:var(--txt);background:rgb(var(--ac-rgb)/.19)}
+.side button.on::before{content:"";position:absolute;left:-11px;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--ac)}
+.side svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.side .sp{flex:1}
+.view{position:absolute;left:64px;right:0;top:0;bottom:0;padding:0 64px;display:none;flex-direction:column;justify-content:center}.view.on{display:flex}
+.hero small{color:var(--tenue);font-size:14px}.hero h1{font-size:clamp(48px,8vw,92px);line-height:.95;font-weight:700;letter-spacing:-2px;margin:10px 0 14px;view-transition-name:titulo}
+.hero .meta{color:var(--tenue);max-width:430px;line-height:1.5;font-size:14px}
+.acciones{display:flex;gap:12px;margin-top:28px}.acciones .btn{padding:0 34px}
+.btn.sec{background:rgb(var(--fg)/.08);color:var(--txt)}.btn.sec:hover{background:rgb(var(--fg)/.13)}.btn[disabled]{opacity:.6;cursor:wait}
+.chips{position:absolute;left:64px;right:0;bottom:0;padding:0 64px 26px;display:flex;gap:10px;flex-wrap:wrap}
+.chip{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--linea);background:rgb(var(--panel-rgb)/.85);cursor:pointer;transition:border-color .2s,background .2s}
+.chip:hover{border-color:color-mix(in srgb,var(--ac) 55%,var(--linea))}.chip.on{border-color:var(--ac);background:rgb(var(--ac-rgb)/.15)}
+.view.col{justify-content:flex-start;padding-top:64px;padding-bottom:36px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.term{flex:1;background:rgb(var(--bg-rgb)/.90);border:1px solid var(--linea);border-radius:14px;padding:16px;font:12px Consolas,monospace;overflow:auto;user-select:text;white-space:pre-wrap;color:color-mix(in srgb,var(--txt) 88%,var(--bg));display:none}
+.term.on{display:block}#crash{color:var(--err)}
+.form{display:flex;flex-direction:column;gap:14px;max-width:420px}.form h2{font-size:30px;letter-spacing:-.5px}
+.form label{font-size:13px;color:var(--tenue);display:flex;flex-direction:column;gap:6px}
+.form input,.form select{height:44px;border-radius:10px;border:1px solid var(--linea);background:var(--in);padding:0 12px;outline:0;color:var(--txt)}
+.form input:focus,.form select:focus{border-color:var(--ac)}.fila{display:flex;gap:8px}
+.barra{height:6px;border-radius:6px;background:rgb(var(--fg)/.10);overflow:hidden;display:none}.barra i{display:block;height:100%;width:0;background:var(--grad);transition:width .15s linear}
+#estado{font-size:13px;color:var(--tenue);min-height:18px}#estado.err{color:var(--err)}
+.ajuste{display:flex;align-items:center;gap:14px;font-size:15px}.sw{width:44px;height:24px;border-radius:12px;background:rgb(var(--fg)/.12);position:relative;cursor:pointer;transition:background .25s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .3s var(--ease)}.sw.on{background:var(--ac)}.sw.on::after{transform:translateX(20px)}
+/* ---- mods ---- */
+.mods-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}.mods-top h2{font-size:30px;letter-spacing:-.5px;margin-right:6px}
+.mods-top select{height:40px;border-radius:10px;border:1px solid var(--linea);background:var(--in);padding:0 12px;outline:0;color:var(--txt);max-width:220px}
+.mods-top .sp{flex:1}.mods-top .btn{height:40px;padding:0 18px}
+.tag{font-size:12px;padding:4px 10px;border-radius:20px;background:rgb(var(--ac-rgb)/.15);color:var(--ac2);text-transform:capitalize}
+#m-info{font-size:13px;color:var(--tenue);margin-bottom:10px;min-height:18px}#m-info.err{color:var(--err)}
+.mods-lista{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px}
+.mod{display:flex;align-items:center;gap:14px;background:rgb(var(--panel-rgb)/.85);border:1px solid var(--linea);border-radius:12px;padding:10px 14px;transition:opacity .2s}
+.mod.off{opacity:.5}.mod .n{flex:1;min-width:0}.mod .n b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mod .n small{display:block;color:var(--tenue);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aviso{font-size:12px;border-radius:8px;padding:3px 8px;white-space:nowrap}.aviso.warn{background:rgb(245 158 11/.15);color:var(--warn)}.aviso.bad{background:rgb(229 72 77/.15);color:var(--err)}
+.mod .x{border:0;background:none;color:var(--tenue);cursor:pointer;width:32px;height:32px;border-radius:8px;font-size:15px}.mod .x:hover{background:#e5484d;color:#fff}
+.vacio{margin:auto;text-align:center;color:var(--tenue);line-height:1.7;font-size:14px;max-width:360px}
+body.arrastrando::after{content:"Suelta aquí los .jar para añadirlos";position:fixed;inset:12px;border:2px dashed var(--ac);border-radius:18px;background:rgb(var(--ac-rgb)/.10);display:flex;align-items:center;justify-content:center;font-size:20px;z-index:50;pointer-events:none}
+/* ---- Modrinth ---- */
+.ocu{display:none!important}
+.mtabs{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.mtabs>button[data-t]{border:0;background:rgb(var(--fg)/.05);color:var(--tenue);padding:8px 16px;border-radius:10px;cursor:pointer;font-weight:600}
+.mtabs>button[data-t].on{background:rgb(var(--ac-rgb)/.20);color:var(--txt)}
+.mini{height:32px;padding:0 14px;border-radius:8px;border:0;background:var(--grad);color:var(--on-ac);font-weight:600;cursor:pointer;white-space:nowrap;transition:filter .15s}.mini:not(.sec):not(:disabled):hover{filter:brightness(1.12)}
+.mini:disabled{opacity:.55;cursor:default}.mini.sec{background:rgb(var(--fg)/.08);color:var(--txt)}
+.busca{display:flex;gap:8px;margin-bottom:12px}
+.busca input,.busca select{height:40px;border-radius:10px;border:1px solid var(--linea);background:var(--in);padding:0 12px;outline:0;color:var(--txt)}
+.busca input{flex:1}.busca input:focus{border-color:var(--ac)}
+#m-exp{flex:1;min-height:0;display:flex;flex-direction:column}#m-res{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px}
+.ico{width:44px;height:44px;border-radius:10px;background:rgb(var(--fg)/.06);flex:none;object-fit:cover}
+.mod .n em{font-style:normal;color:var(--tenue);font-weight:400}
+/* ---- Modpacks ---- */
+#p-estado{font-size:13px;color:var(--tenue);margin:0 0 10px;min-height:18px}#p-estado.err{color:var(--err)}
+.pbarra{height:6px;border-radius:6px;background:rgb(var(--fg)/.08);overflow:hidden;margin-bottom:8px;display:none}.pbarra i{display:block;height:100%;width:0;background:var(--grad);transition:width .2s}
+.pexp{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;width:100%}
+.pexp select,.pexp input{height:34px;border-radius:8px;border:1px solid var(--linea);background:var(--in);padding:0 10px;outline:0;color:var(--txt);min-width:0}
+.pexp select{max-width:260px}.pexp input{flex:1;min-width:120px}
+.mod.col{flex-wrap:wrap}
+/* ---- Centro de modpacks (rejilla + filtros) ---- */
+#v-packs{padding:0;justify-content:stretch}
+.pk{display:flex;flex:1;min-height:0}
+.pk-main{flex:1;min-width:0;overflow:auto;padding:54px 28px 30px 40px}
+.pk-cab{display:flex;align-items:flex-start;gap:12px}.pk-cab .sp{flex:1}.pk-cab h2{font-size:30px;letter-spacing:-.5px}
+.pk-sub{color:var(--tenue);font-size:14px;margin:4px 0 18px}
+.pk-busca{position:relative;margin-bottom:14px}
+.pk-busca svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;fill:none;stroke:var(--tenue);stroke-width:1.8;stroke-linecap:round}
+.pk-busca input{width:100%;height:46px;border-radius:12px;border:1px solid var(--linea);background:rgb(var(--in-rgb)/.85);padding:0 14px 0 44px;outline:0;color:var(--txt);transition:border-color .2s,box-shadow .2s}
+.pk-busca input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgb(var(--ac-rgb)/.20)}
+.pk-barra{display:flex;align-items:center;gap:10px;margin:8px 0 14px}.pk-barra b{font-size:16px}.pk-barra small{color:var(--tenue);font-size:12px}.pk-barra .sp{flex:1}
+.pk-barra select{height:36px;border-radius:10px;border:1px solid var(--linea);background:rgb(var(--in-rgb)/.85);padding:0 10px;outline:0;color:var(--txt)}
+.vista{display:flex;gap:2px;background:rgb(var(--in-rgb)/.85);border:1px solid var(--linea);border-radius:10px;padding:3px}
+.vista button{width:32px;height:28px;border:0;border-radius:7px;background:none;color:var(--tenue);cursor:pointer;display:grid;place-items:center}
+.vista button.on{background:rgb(var(--ac-rgb)/.20);color:var(--ac2)}.vista svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pk-res{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;align-items:start}
+.pk-res .vacio{grid-column:1/-1;padding:40px 0}
+.pk-mas{grid-column:1/-1;justify-self:center;margin:4px 0 8px}
+.pk-card{position:relative;background:rgb(var(--panel-rgb)/.85);border:1px solid var(--linea);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s,transform .2s}
+.pk-card:hover{border-color:color-mix(in srgb,var(--ac) 55%,var(--linea));transform:translateY(-2px)}
+.pk-banner{position:relative;height:96px;flex:none;background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 30%,var(--panel)),var(--panel))}
+.pk-banner img{width:100%;height:100%;object-fit:cover;display:block}
+.pk-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgb(var(--panel-rgb)/.70),transparent 65%)}
+.pk-card .pk-ico{position:absolute;left:12px;top:72px;width:48px;height:48px;border:2px solid var(--panel);background:color-mix(in srgb,var(--panel) 88%,var(--txt));z-index:1}
+.pk-cuerpo{padding:30px 14px 12px;display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.pk-t{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pk-t b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-t span{font-size:11px;color:var(--tenue);white-space:nowrap;display:flex;align-items:center;gap:3px}
+.pk-cuerpo p{font-size:12px;color:var(--tenue);line-height:1.45;min-height:35px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pk-pie{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
+.pk-pie small{color:var(--tenue);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;min-width:0}
+.pk-card .mini{font-size:12.5px}
+.tag:empty{display:none}
+.pk-pie .mini{display:flex;align-items:center;gap:6px;flex:none}
+.pk-card .pexp{flex-direction:column;align-items:stretch}.pk-card .pexp select{max-width:none;width:100%}.pk-card .pexp input{flex:none;width:100%}.pk-card .pexp .mini{width:100%;justify-content:center}
+.pk-res.lista{grid-template-columns:1fr}.pk-res.lista .pk-card{flex-direction:row}
+.pk-res.lista .pk-banner{width:170px;height:auto;min-height:104px}.pk-res.lista .pk-card .pk-ico{top:28px;left:61px}
+.pk-res.lista .pk-cuerpo{padding:12px 14px}
+.pk-filtros{width:250px;flex:none;border-left:1px solid var(--linea);background:rgb(var(--in-rgb)/.80);backdrop-filter:blur(14px);padding:54px 18px 20px;overflow:auto}
+.pk-filtros h3{font-size:14px;display:flex;align-items:center;gap:8px}.pk-filtros h3 svg{width:16px;height:16px;fill:none;stroke:var(--tenue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pk-filtros h3 .mini{margin-left:auto;height:26px;font-size:12px;padding:0 10px}
+.pk-filtros h4{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--tenue);margin:20px 0 10px}
+.pk-filtros select{width:100%;height:38px;border-radius:10px;border:1px solid var(--linea);background:var(--in);padding:0 10px;outline:0;color:var(--txt)}
+.fchips{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{height:30px;padding:0 12px;border-radius:15px;border:1px solid transparent;background:rgb(var(--fg)/.05);color:var(--tenue);cursor:pointer;font-size:12px;transition:color .15s,background .15s,border-color .15s}
+.fchip:hover{color:var(--txt);background:rgb(var(--fg)/.09)}.fchip.on{background:rgb(var(--ac-rgb)/.20);border-color:var(--ac);color:var(--txt)}
+
+/* ---- transiciones (View Transitions API) ---- */
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+[data-vt=reveal]::view-transition-new(root){animation:reveal .9s var(--ease)}
+[data-vt=reveal]::view-transition-old(root){animation:baja .9s var(--ease)}
+@keyframes reveal{from{clip-path:circle(0 at var(--vx) var(--vy))}to{clip-path:circle(150vmax at var(--vx) var(--vy))}}
+@keyframes baja{to{transform:scale(.97);filter:brightness(.5)}}
+[data-vt=fade]::view-transition-old(root){animation:sale .25s ease both}[data-vt=fade]::view-transition-new(root){animation:ent .4s var(--ease) both}
+@keyframes sale{to{opacity:0}}@keyframes ent{from{opacity:0}}
+::view-transition-old(titulo){animation:sale .2s both}::view-transition-new(titulo){animation:tit .5s var(--ease) both}
+@keyframes tit{from{opacity:0;transform:translateX(-36px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+.ctabs{display:flex;gap:6px;margin:2px 0 16px}
+.ctabs button{border:0;background:rgb(var(--fg)/.05);color:var(--tenue);padding:8px 16px;border-radius:10px;cursor:pointer;font-weight:600}
+.ctabs button.on{background:rgb(var(--ac-rgb)/.20);color:var(--txt)}
+.pk.inst .pk-filtros{display:none}
+.inst-sel{display:flex;align-items:center;gap:8px}
+.inst-sel select{height:40px;border-radius:10px;border:1px solid var(--linea);background:rgb(var(--in-rgb)/.85);padding:0 12px;outline:0;color:var(--txt);max-width:200px}
+.pk-main .mods-lista{overflow:visible}
+
+/* ---- scrollbar con el tema: pulgar con degradado del acento, riel sutil, brillo al pasar el ratón ---- */
+::-webkit-scrollbar{width:14px;height:14px}
+::-webkit-scrollbar-track{background:transparent;margin:6px 0;border:4px solid transparent;border-radius:10px;background-clip:padding-box;box-shadow:inset 0 0 0 20px rgb(var(--fg)/.05)}
+::-webkit-scrollbar-thumb{border:4px solid transparent;border-radius:10px;background:var(--grad) padding-box;min-height:44px;min-width:44px;
+  box-shadow:inset 0 0 0 1px rgb(255 255 255/.18),0 0 10px rgb(var(--ac-rgb)/.45);opacity:.8}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(135deg,var(--ac2),var(--ac)) padding-box;box-shadow:inset 0 0 0 1px rgb(255 255 255/.3),0 0 14px rgb(var(--ac-rgb)/.75)}
+::-webkit-scrollbar-thumb:active{background:var(--ac2) padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--ac) transparent}}
+option{background:var(--panel);color:var(--txt)}
+::selection{background:rgb(var(--ac-rgb)/.4)}
+
+/* ---- ajustes: apariencia ---- */
+#v-aj{padding-right:40px}
+.aj{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:18px;padding:0 14px 8px 0;max-width:820px}
+.aj h2{font-size:30px;letter-spacing:-.5px}.aj-sub{color:var(--tenue);font-size:14px;margin:4px 0 4px}
+.aj-card{background:rgb(var(--panel-rgb)/.85);border:1px solid var(--linea);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;backdrop-filter:blur(10px)}
+.aj-card h3{font-size:15px}.aj-card h3 small{color:var(--tenue);font-weight:400;font-size:12px;margin-left:8px}
+.modos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.modo{border:2px solid var(--linea);background:none;border-radius:14px;padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;gap:8px;align-items:stretch;text-align:center;font-size:13px;color:var(--txt);transition:border-color .2s,transform .2s,box-shadow .2s}
+.modo:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ac) 55%,var(--linea))}
+.modo.on{border-color:var(--ac);box-shadow:0 0 0 3px rgb(var(--ac-rgb)/.2),0 6px 20px rgb(var(--ac-rgb)/.2)}
+.mv{height:58px;border-radius:9px;position:relative;overflow:hidden;background:var(--c1);border:1px solid rgb(128 128 128/.25)}
+.mv::before{content:"";position:absolute;left:0;top:0;bottom:0;width:14px;background:var(--c2)}
+.mv::after{content:"";position:absolute;left:24px;top:12px;width:44%;height:8px;border-radius:4px;background:var(--ac);box-shadow:0 14px 0 -1px var(--c3),0 26px 0 -1px var(--c3)}
+.mv.auto{background:linear-gradient(115deg,#f3f1f8 50%,#0b0a10 50%)}.mv.auto::before{background:linear-gradient(180deg,#fff 50%,#14121c 50%)}
+.temas{display:flex;flex-wrap:wrap;gap:12px}
+.tema{width:44px;height:44px;border-radius:50%;border:3px solid transparent;background:var(--g) padding-box;cursor:pointer;position:relative;transition:transform .2s,box-shadow .2s;outline:0}
+.tema:hover{transform:scale(1.12)}.tema.on{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--c);}
+.tema.on::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:700;text-shadow:0 1px 3px #0008}
+.pers{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.pers label{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--tenue)}
+input[type=color]{-webkit-appearance:none;appearance:none;width:42px;height:34px;padding:0;border:1px solid var(--linea);border-radius:10px;background:none;cursor:pointer;overflow:hidden}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-webkit-color-swatch{border:0;border-radius:9px}
+.fondo-fila{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap}
+.fprev{width:210px;height:118px;border-radius:12px;border:1px solid var(--linea);background:var(--bg) center/cover;position:relative;overflow:hidden;flex:none}
+.fprev::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgb(var(--bg-rgb)/calc(.95*var(--vel))),rgb(var(--bg-rgb)/calc(.4*var(--vel))))}
+.fprev span{position:absolute;left:10px;bottom:8px;z-index:1;font-size:11px;color:var(--txt);background:rgb(var(--bg-rgb)/.7);padding:2px 8px;border-radius:8px}
+.fctl{flex:1;min-width:230px;display:flex;flex-direction:column;gap:12px;justify-content:space-between}
+.fbtns{display:flex;flex-wrap:wrap;gap:8px}.fbtns .mini{height:34px}.fbtns .mini.on{outline:2px solid var(--ac);outline-offset:1px}
+.fbtns .mini[disabled]{opacity:.4}
+.rango{display:grid;grid-template-columns:130px 1fr 44px;align-items:center;gap:12px;font-size:13px;color:var(--tenue)}
+.rango b{color:var(--txt);font-weight:600;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--ac) var(--p,50%),rgb(var(--fg)/.14) var(--p,50%));outline:0;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--ac);box-shadow:0 2px 8px #0006;transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+.aj-msg{font-size:12px;color:var(--tenue);min-height:16px}.aj-msg.err{color:var(--err)}
+.aj-fin{height:6px;flex:none}
+
+/* ---- iconos de instancia ---- */
+.hero-top{display:flex;align-items:center;gap:14px}
+.hico{width:60px;height:60px;border-radius:16px;border:1px solid var(--linea);background:rgb(var(--panel-rgb)/.7);padding:6px;cursor:pointer;position:relative;transition:transform .2s,border-color .2s,box-shadow .2s}
+.hico:hover{transform:translateY(-2px) rotate(-3deg);border-color:var(--ac);box-shadow:0 8px 22px rgb(var(--ac-rgb)/.3)}
+.hico img,.ic img,.ci{display:block;object-fit:contain}.hico img{width:100%;height:100%}
+.hico::after{content:"✎";position:absolute;right:-6px;bottom:-6px;width:20px;height:20px;border-radius:50%;background:var(--grad);color:var(--on-ac);font-size:11px;display:grid;place-items:center;opacity:0;transition:opacity .2s}
+.hico:hover::after{opacity:1}
+.chip{display:inline-flex;align-items:center;gap:8px}.ci{width:22px;height:22px;flex:none}
+.ic-btn{width:54px;height:54px;flex:none;border-radius:12px;border:1px solid var(--linea);background:rgb(var(--in-rgb)/.85);padding:5px;cursor:pointer;align-self:flex-end;transition:border-color .2s,transform .2s}
+.ic-btn:hover{border-color:var(--ac);transform:translateY(-1px)}.ic-btn img{width:100%;height:100%;object-fit:contain;display:block}
+.fila.fn{align-items:flex-end}.fila.fn label{flex:1}
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgb(var(--bg-rgb)/.62);backdrop-filter:blur(6px)}
+.modal.on{display:flex;animation:ent .25s var(--ease)}
+.m-card{background:var(--panel);border:1px solid var(--linea);border-radius:18px;box-shadow:0 24px 70px #0008;display:flex;flex-direction:column;max-height:84vh;animation:sube .35s var(--ease) both}
+.m-cab{display:flex;align-items:center;gap:12px;padding:16px 20px 12px}.m-cab h3{font-size:18px;flex:1}
+.m-x{border:0;background:rgb(var(--fg)/.08);width:32px;height:32px;border-radius:9px;cursor:pointer;color:var(--txt)}.m-x:hover{background:#e5484d;color:#fff}
+#ico-modal .m-card{width:460px}.icogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px;padding:4px 20px 8px;overflow:auto}
+.ic{aspect-ratio:1;border:2px solid var(--linea);border-radius:14px;background:rgb(var(--in-rgb)/.85);padding:7px;cursor:pointer;transition:transform .15s,border-color .2s,box-shadow .2s}
+.ic img{width:100%;height:100%}.ic:hover{transform:translateY(-2px) scale(1.04);border-color:color-mix(in srgb,var(--ac) 55%,var(--linea))}
+.ic.on{border-color:var(--ac);box-shadow:0 0 0 3px rgb(var(--ac-rgb)/.22)}
+.ic.add{border-style:dashed;color:var(--tenue);font-size:26px;display:grid;place-items:center;padding:0}
+.m-pie{padding:8px 20px 16px;font-size:12px;color:var(--tenue);line-height:1.5;min-height:20px}.m-pie.err{color:var(--err)}
+/* ---- noticias de Minecraft ---- */
+#v-home{padding-right:420px}
+.news{position:absolute;right:28px;top:52px;bottom:92px;width:344px;display:flex;flex-direction:column;border:1px solid var(--linea);border-radius:18px;background:rgb(var(--panel-rgb)/.8);backdrop-filter:blur(14px);overflow:hidden}
+.news-cab{display:flex;align-items:center;gap:8px;padding:14px 16px 10px}.news-cab h3{font-size:14px;flex:1;display:flex;align-items:center;gap:8px}
+.news-cab h3 svg{width:16px;height:16px;fill:none;stroke:var(--tenue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.news-cab .mini{height:26px;padding:0 10px;font-size:12px}
+.news-lista{flex:1;overflow:auto;padding:2px 8px 10px 12px;display:flex;flex-direction:column;gap:8px}
+.nw{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid transparent;border-radius:12px;background:rgb(var(--fg)/.04);padding:8px;cursor:pointer;color:var(--txt);transition:background .2s,border-color .2s,transform .2s;flex:none;animation:sube .5s var(--ease) both}
+.nw:hover{background:rgb(var(--ac-rgb)/.12);border-color:rgb(var(--ac-rgb)/.45);transform:translateX(-2px)}
+.nw-img{width:62px;height:62px;border-radius:9px;flex:none;object-fit:cover;background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 30%,var(--panel)),var(--panel))}
+.nw-t{min-width:0;display:flex;flex-direction:column;gap:5px}.nw-t b{font-size:13px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nw-t small{color:var(--tenue);font-size:11px;display:flex;align-items:center;gap:7px}
+.etq{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 7px;border-radius:10px;background:rgb(var(--ac-rgb)/.18);color:var(--ac2)}
+.etq.snap{background:rgb(245 158 11/.16);color:var(--warn)}
+.news-msg{margin:auto;text-align:center;color:var(--tenue);font-size:13px;line-height:1.6;padding:20px}
+.news-msg .mini{margin-top:10px}.news-off{font-size:11px;color:var(--warn);padding:0 16px 6px}
+@media (max-width:1010px){.news{display:none}#v-home{padding-right:64px}}
+#nw-modal .m-card{width:min(720px,92vw)}.nw-hero{height:150px;flex:none;background:center/cover;position:relative;border-radius:18px 18px 0 0;overflow:hidden}
+.nw-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--panel),transparent 70%)}
+.nw-cuerpo{overflow:auto;padding:4px 26px 24px;user-select:text;font-size:14px;line-height:1.6}
+.nw-cuerpo h1,.nw-cuerpo h2{font-size:20px;margin:18px 0 8px}.nw-cuerpo h3{font-size:16px;margin:16px 0 6px}.nw-cuerpo h4{font-size:14px;margin:12px 0 4px;color:var(--ac2)}
+.nw-cuerpo p{margin:8px 0;color:color-mix(in srgb,var(--txt) 88%,var(--bg))}.nw-cuerpo ul,.nw-cuerpo ol{margin:6px 0 6px 22px;display:flex;flex-direction:column;gap:3px}
+.nw-cuerpo li::marker{color:var(--ac)}.nw-cuerpo a{color:var(--ac2);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.nw-cuerpo img{max-width:100%;border-radius:10px;margin:8px 0}.nw-cuerpo code,.nw-cuerpo pre{font-family:Consolas,monospace;background:rgb(var(--fg)/.08);border-radius:6px;padding:1px 6px;font-size:12.5px}
+.nw-cuerpo pre{padding:10px;overflow:auto}.nw-cuerpo hr{border:0;border-top:1px solid var(--linea);margin:16px 0}.nw-cuerpo blockquote{border-left:3px solid var(--ac);padding-left:12px;color:var(--tenue)}
+.nw-cab-t{padding:0 26px 6px;margin-top:-34px;position:relative;z-index:1}.nw-cab-t h2{font-size:24px;letter-spacing:-.4px}.nw-cab-t small{color:var(--tenue)}
+
+/* ---- CurseForge, actualizar modpacks ---- */
+.cf-nota{font-size:11.5px;color:var(--tenue);line-height:1.5;margin-top:8px}.bloq{color:var(--warn)}
+.fila-key{display:flex;gap:8px}.fila-key input{flex:1;height:38px;border-radius:10px;border:1px solid var(--linea);background:var(--in);padding:0 12px;outline:0;color:var(--txt);user-select:text}.fila-key input:focus{border-color:var(--ac)}
+#up-modal .m-card,#fl-modal .m-card{width:min(520px,92vw)}
+.up-cuerpo{padding:4px 20px 18px;display:flex;flex-direction:column;gap:12px;font-size:13px}.up-cuerpo label{display:flex;flex-direction:column;gap:6px;color:var(--tenue)}.up-cuerpo label b{color:var(--txt);font-weight:600}
+.up-cuerpo select{height:38px;border-radius:10px;border:1px solid var(--linea);background:var(--in);padding:0 10px;color:var(--txt);outline:0}
+.up-aviso{font-size:12px;color:var(--tenue);line-height:1.5}.up-aviso.warn{color:var(--warn)}.up-btns{display:flex;gap:8px}.up-est{font-size:12.5px;color:var(--tenue);min-height:16px;line-height:1.5}.up-est.err{color:var(--err)}
+.fl-lista{display:flex;flex-direction:column;gap:6px;padding:0 20px 6px;overflow:auto}
+.fl-fila{display:flex;align-items:center;gap:10px;background:rgb(var(--fg)/.05);border-radius:10px;padding:8px 12px}.fl-fila b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+#p-imp{white-space:nowrap}
+</style></head><body>
+<div class="bg"><div class="img" id="bgimg"></div></div>
+<div class="top pywebview-drag-region"><button id="min">—</button><button class="x" id="cer">✕</button></div>
+
+<section id="login"><div class="card">
+  <div class="logo">DOME<span>Launcher</span></div><p>Modo sin conexión. Elige tu nombre de jugador.</p>
+  <input id="nick" maxlength="16" placeholder="Nombre de usuario" autocomplete="off"><button class="btn" id="entrar">Entrar</button>
+</div></section>
+
+<section id="app">
+  <nav class="side">
+    <button class="on" data-v="home" title="Inicio"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></button>
+    <button data-v="crear" title="Crear instancia"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button data-v="packs" title="Centro de contenido"><svg viewBox="0 0 24 24"><path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5"/></svg></button>
+    <button data-v="reg" title="Registro"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg></button>
+    <button data-v="aj" title="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
+    <div class="sp"></div><button id="salir" title="Cambiar cuenta"><svg viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/></svg></button>
+  </nav>
+  <div class="view hero on" id="v-home"><div class="hero-top"><button class="hico" id="h-ico" title="Cambiar icono"><img alt=""></button><small id="usr"></small></div><h1 id="tit">Sin instancias</h1><div class="meta" id="meta">Crea una instancia para empezar a jugar.</div>
+    <div class="acciones"><button class="btn" id="jugar">Jugar</button><button class="btn sec" id="carp">Carpeta</button><button class="btn sec ocu" id="h-upd" title="Buscar una versión nueva del modpack">Actualizar modpack</button><button class="btn sec" id="elim">Eliminar</button></div>
+    <aside class="news" id="news"><div class="news-cab"><h3><svg viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v13a1 1 0 0 0 1 1H7a2 2 0 0 1-2-2z"/><path d="M18 8h2v10a2 2 0 0 1-2 2M8 8h7M8 12h7M8 16h4"/></svg>Novedades de Minecraft</h3><button class="mini sec" id="nw-ref" title="Actualizar">↻</button></div>
+      <div class="news-off ocu" id="nw-off">Sin conexión: mostrando las últimas noticias guardadas.</div>
+      <div class="news-lista" id="nw-lista"><div class="news-msg">Cargando noticias…</div></div></aside></div>
+  <div class="chips" id="chips"></div>
+  <div class="view col" id="v-crear"><div class="form"><h2>Nueva instancia</h2>
+    <div class="fila fn"><button class="ic-btn" id="c-ico" title="Elegir icono" type="button"><img alt=""></button><label>Nombre<input id="c-nom" maxlength="30" placeholder="Mi servidor"></label></div>
+    <div class="fila" id="c-tipo"><button class="chip on" data-t="Vanilla">Vanilla</button><button class="chip" data-t="Forge">Forge</button><button class="chip" data-t="NeoForge">NeoForge</button><button class="chip" data-t="Fabric">Fabric</button></div>
+    <label>Versión<select id="c-ver"></select></label>
+    <label>Memoria RAM<select id="c-ram"><option>2</option><option selected>4</option><option>6</option><option>8</option></select></label>
+    <div class="barra" id="barra"><i></i></div><div id="estado"></div>
+    <button class="btn" id="c-ok">Instalar</button></div></div>
+  <div class="view col" id="v-packs"><div class="pk">
+    <div class="pk-main">
+      <div class="pk-cab"><div><h2>Centro de contenido</h2><div class="pk-sub">Busca e instala modpacks, mods y recursos de Modrinth y CurseForge</div></div>
+        <div class="sp"></div>
+        <div class="inst-sel" id="p-instbox"><span class="tag" id="m-loader"></span><select id="m-inst" title="Instancia donde se instala"></select></div>
+        <button class="btn sec" id="p-imp" style="height:40px;padding:0 18px" title="Archivo .mrpack (Modrinth) o .zip (CurseForge)">Importar modpack</button></div>
+      <div class="ctabs"><button class="on" data-ct="exp">Explorar</button><button data-ct="inst">Mods instalados</button></div>
+      <div id="c-exp">
+        <div class="pk-busca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="p-q" placeholder="Buscar modpacks…" autocomplete="off"></div>
+        <div class="pbarra" id="p-barra"><i></i></div><div id="p-estado"></div>
+        <div class="pk-barra"><b id="p-tit">Modpack</b><small id="p-total"></small><div class="sp"></div>
+          <select id="p-ord"><option value="downloads">Descargas</option><option value="relevance">Relevancia</option><option value="follows">Seguidores</option><option value="newest">Más nuevos</option><option value="updated">Recién actualizados</option></select>
+          <div class="vista"><button class="on" data-vista="grid" title="Cuadrícula"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></button>
+            <button data-vista="lista" title="Lista"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></svg></button></div></div>
+        <div class="pk-res" id="p-res"></div>
+      </div>
+      <div id="c-inst" class="ocu">
+        <div class="mods-top" style="margin-bottom:10px"><div class="sp"></div>
+          <button class="mini sec" id="m-upd">Buscar actualizaciones</button>
+          <button class="btn sec" id="m-add" style="height:36px;padding:0 16px">Añadir .jar</button>
+          <button class="btn sec" id="m-dir" style="height:36px;padding:0 16px">Carpeta</button></div>
+        <div id="m-info"></div><div class="mods-lista" id="m-lista"></div>
+      </div>
+    </div>
+    <aside class="pk-filtros" id="p-fil">
+      <h3><svg viewBox="0 0 24 24"><path d="M4 5h16l-6 8v6l-4-2v-4z"/></svg>Filtros<button class="mini sec" id="p-limpiar">Limpiar</button></h3>
+      <h4>Fuente</h4><div class="fchips" id="p-fuentes"><button class="fchip on" data-fu="modrinth">Modrinth</button><button class="fchip" data-fu="curseforge">CurseForge</button></div>
+      <h4>Tipo de contenido</h4><div class="fchips">
+        <button class="fchip on" data-ty="modpack">Modpack</button><button class="fchip" data-ty="mod">Mod</button><button class="fchip" data-ty="resourcepack">Resource Pack</button>
+        <button class="fchip" data-ty="datapack">Data Pack</button><button class="fchip" data-ty="shader">Shader</button></div>
+      <h4>Versión del juego</h4><select id="p-ver"><option value="">Cualquier versión</option></select>
+      <div id="p-sec-load"><h4>Cargadores de mods</h4><div class="fchips">
+        <button class="fchip" data-l="fabric">Fabric</button><button class="fchip" data-l="quilt">Quilt</button><button class="fchip" data-l="forge">Forge</button><button class="fchip" data-l="neoforge">NeoForge</button></div><div class="cf-nota ocu" id="p-cf-nota">CurseForge filtra por un solo cargador y solo si eliges una versión del juego.</div></div>
+      <div id="p-sec-cat"><h4>Categorías</h4><div class="fchips" id="p-cats"></div></div>
+    </aside></div></div>
+  <div class="view col" id="v-reg"><div class="tabs"><button class="chip on" data-p="log">Registro</button><button class="chip" data-p="crash">Crash report</button></div>
+    <pre class="term on" id="log">Aquí verás todo lo que pasa al lanzar el juego.</pre>
+    <pre class="term" id="crash">Sin errores detectados todavía.</pre></div>
+  <div class="view col" id="v-aj"><div class="aj">
+    <div><h2>Ajustes</h2><div class="aj-sub">Personaliza cómo se ve tu launcher. Los cambios se guardan solos.</div></div>
+    <div class="aj-card"><h3>Modo</h3><div class="modos" id="aj-modos">
+      <button class="modo" data-modo="claro"><div class="mv" style="--c1:#f3f1f8;--c2:#fff;--c3:#d9d5e6"></div>Claro</button>
+      <button class="modo" data-modo="oscuro"><div class="mv" style="--c1:#0b0a10;--c2:#14121c;--c3:#2a2638"></div>Oscuro</button>
+      <button class="modo" data-modo="oled"><div class="mv" style="--c1:#000;--c2:#0a0a0c;--c3:#1e1e22"></div>OLED</button>
+      <button class="modo" data-modo="auto"><div class="mv auto"></div>Automático</button></div>
+      <div class="aj-msg">OLED usa negro puro (ahorra batería en pantallas OLED). Automático sigue el modo de Windows.</div></div>
+    <div class="aj-card"><h3>Color del tema<small>acento de botones, barras y scroll</small></h3><div class="temas" id="aj-temas"></div>
+      <div class="pers"><label>Color principal<input type="color" id="aj-c1"></label>
+        <label>Color secundario<input type="color" id="aj-c2"></label>
+        <button class="mini sec" id="aj-c2x">Quitar secundario</button><button class="mini sec" id="aj-rst">Restablecer</button></div></div>
+    <div class="aj-card"><h3>Fondo<small>PNG, JPG, WEBP o GIF · máx. 25 MB</small></h3>
+      <div class="fondo-fila"><div class="fprev" id="aj-prev"><span id="aj-prevt"></span></div>
+        <div class="fctl"><div class="fbtns"><button class="mini" id="fo-elegir">Elegir imagen o GIF…</button>
+          <button class="mini sec" data-fo="custom" id="fo-cus">Mi fondo</button><button class="mini sec" data-fo="default">Predeterminado</button><button class="mini sec" data-fo="none">Sin fondo</button></div>
+          <div class="rango"><span>Velo</span><input type="range" id="aj-velo" min="0" max="100"><b id="aj-velo-v"></b></div>
+          <div class="rango"><span>Desenfoque</span><input type="range" id="aj-blur" min="0" max="20"><b id="aj-blur-v"></b></div></div></div>
+      <div class="aj-msg" id="aj-fmsg"></div></div>
+    <div class="aj-card"><h3>CurseForge<small>para buscar e instalar mods y modpacks de CurseForge</small></h3>
+      <div class="fila-key"><input type="password" id="cf-key" placeholder="Pega aquí tu clave de API" autocomplete="off" spellcheck="false"><button class="mini" id="cf-guardar">Guardar</button><button class="mini sec" id="cf-quitar">Quitar</button></div>
+      <div class="aj-msg" id="cf-msg"></div>
+      <div class="aj-msg">Consigue una clave gratis en console.curseforge.com (con tu cuenta de CurseForge → «API Keys»). Se guarda solo en tu equipo y nunca se muestra aquí.</div></div>
+    <div class="aj-card"><div class="ajuste"><div class="sw on" id="swa"></div>Animaciones de transición</div></div>
+    <div class="aj-fin"></div></div></div>
+</section>
+
+<div class="modal" id="ico-modal"><div class="m-card"><div class="m-cab"><h3>Elige un icono</h3><button class="m-x" data-cerrar>✕</button></div>
+  <div class="icogrid" id="ico-grid"></div>
+  <div class="m-pie" id="ico-msg">Pulsa «+» para añadir tus propias imágenes (PNG, JPG, WEBP o GIF, hasta 2 MB). También puedes copiarlas a la carpeta <b>web/iconos</b>.</div></div></div>
+<div class="modal" id="up-modal"><div class="m-card"><div class="m-cab"><h3 id="up-t">Actualizar modpack</h3><button class="m-x" data-cerrar>✕</button></div>
+  <div class="up-cuerpo"><div id="up-msg">Buscando versiones…</div>
+    <div class="ocu" id="up-form" style="display:flex;flex-direction:column;gap:12px">
+      <label>Versión instalada<b id="up-act"></b></label>
+      <label>Actualizar a<select id="up-sel"></select></label>
+      <div class="up-aviso" id="up-aviso"></div>
+      <div class="up-btns"><button class="mini" id="up-ok">Actualizar</button><button class="mini sec" data-cerrar>Cancelar</button></div></div>
+    <div class="pbarra" id="up-barra" style="display:none"><i></i></div><div class="up-est" id="up-est"></div></div></div></div>
+<div class="modal" id="fl-modal"><div class="m-card"><div class="m-cab"><h3>Faltan archivos por descargar</h3><button class="m-x" data-cerrar>✕</button></div>
+  <div class="m-pie" style="padding-top:0">Los autores de estos archivos no permiten que otras aplicaciones los descarguen. Bájalos desde su página de CurseForge y copia el archivo a la carpeta de la instancia (los .jar, a «mods»).</div>
+  <div class="fl-lista" id="fl-lista"></div>
+  <div class="m-pie"><button class="mini" id="fl-carp">Abrir carpeta de mods</button></div></div></div>
+<div class="modal" id="nw-modal"><div class="m-card"><div class="nw-hero" id="nw-hero"><button class="m-x" data-cerrar style="position:absolute;right:14px;top:14px;z-index:2">✕</button></div>
+  <div class="nw-cab-t"><h2 id="nw-t"></h2><small id="nw-f"></small></div><div class="nw-cuerpo" id="nw-c"></div></div></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let usuario="",lista=[],sel=0,anim=true,jugando=false;
+const api=()=>window.pywebview&&window.pywebview.api;
+const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+/* Ejecuta un cambio de pantalla con transición. tipo: reveal (círculo desde x,y) o fade */
+function vt(fn,tipo="fade",x,y){
+  if(!anim||reduce||!document.startViewTransition)return fn();
+  const r=document.documentElement;r.dataset.vt=tipo;
+  r.style.setProperty("--vx",(x??innerWidth/2)+"px");r.style.setProperty("--vy",(y??innerHeight/2)+"px");
+  document.startViewTransition(fn);
+}
+/* ---- iconos de instancia ---- */
+let icos=[];
+const ICO_DEMO=["tierra.png","cesped.png","piedra.png"];
+const icoSrc=i=>{const n=i&&i.icono;const f=icos.includes(n)?n:(icos[0]||"");return f?"iconos/"+encodeURIComponent(f):""};
+const icoUrl=n=>"iconos/"+encodeURIComponent(n);
+async function cargarIconos(){const r=api()?await api().iconos_listar():{datos:ICO_DEMO};icos=r.datos||[]}
+let icoCb=null;
+function cerrarModal(m){m.classList.remove("on");if(m.id==="ico-modal"&&icoCb){const f=icoCb;icoCb=null;f(null)}}
+$$(".modal").forEach(m=>{m.addEventListener("mousedown",e=>{if(e.target===m||e.target.closest("[data-cerrar]"))cerrarModal(m)})});
+addEventListener("keydown",e=>{if(e.key==="Escape")$$(".modal.on").forEach(cerrarModal)});
+function pintarGridIconos(actual){
+  $("#ico-grid").innerHTML=icos.map(n=>`<button class="ic ${n===actual?"on":""}" data-i="${esc(n)}" title="${esc(n.replace(/\.\w+$/,""))}"><img src="${icoUrl(n)}" alt=""></button>`).join("")+'<button class="ic add" id="ico-add" title="Añadir imagen">+</button>'}
+async function elegirIcono(actual){
+  await cargarIconos();$("#ico-msg").classList.remove("err");
+  return new Promise(res=>{
+    icoCb=res;pintarGridIconos(actual);$("#ico-modal").classList.add("on");
+    $("#ico-grid").onclick=async e=>{
+      const b=e.target.closest(".ic");if(!b)return;
+      if(b.id==="ico-add"){
+        if(!api())return;const r=await api().icono_anadir();if(r.cancelado)return;
+        const m=$("#ico-msg");m.classList.toggle("err",!r.ok);
+        if(!r.ok){m.textContent=r.error;return}
+        icos=r.lista;pintarGridIconos(r.datos);m.textContent="Añadida: "+r.datos;return}
+      const n=b.dataset.i;icoCb=null;$("#ico-modal").classList.remove("on");res(n)}})}
+$("#h-ico").onclick=async()=>{
+  const i=lista[sel];if(!i)return;const n=await elegirIcono(icos.includes(i.icono)?i.icono:icos[0]);if(!n)return;
+  if(api()){const r=await api().instancia_icono(i.nombre,n);if(!r.ok)return}
+  i.icono=n;pintar()};
+let cIcono="";
+const pintarCIcono=()=>{$("#c-ico img").src=cIcono?icoUrl(cIcono):""};
+$("#c-ico").onclick=async()=>{const n=await elegirIcono(cIcono);if(n){cIcono=n;pintarCIcono()}};
+/* ---- noticias oficiales de Minecraft ---- */
+const fFecha=d=>{const t=new Date(d+"T12:00:00");return isNaN(t)?"":t.toLocaleDateString("es",{day:"numeric",month:"short",year:"numeric"})};
+const NW_DEMO=[{id:"a",titulo:"Minecraft 26.4 Snapshot 3",tipo:"snapshot",fecha:"2026-10-06",imagen:""},{id:"b",titulo:"Minecraft 26.3 Release",tipo:"release",fecha:"2026-09-02",imagen:""},{id:"c",titulo:"Minecraft 26.4 Snapshot 1",tipo:"snapshot",fecha:"2026-09-22",imagen:""}];
+let nwCargando=false;
+async function cargarNoticias(){
+  if(nwCargando)return;nwCargando=true;const L=$("#nw-lista");
+  L.innerHTML='<div class="news-msg">Cargando noticias…</div>';$("#nw-off").classList.add("ocu");
+  const r=api()?await api().novedades():{ok:true,datos:{entradas:NW_DEMO,sin_conexion:false}};
+  nwCargando=false;
+  if(!r.ok){L.innerHTML=`<div class="news-msg">No pude cargar las noticias.<br><small>${esc(r.error)}</small><br><button class="mini sec" id="nw-reint">Reintentar</button></div>`;return}
+  $("#nw-off").classList.toggle("ocu",!r.datos.sin_conexion);
+  L.innerHTML=r.datos.entradas.map((n,k)=>`<button class="nw" data-id="${esc(n.id)}" style="animation-delay:${k*45}ms">
+    ${n.imagen?`<img class="nw-img" loading="lazy" referrerpolicy="no-referrer" src="${esc(n.imagen)}" alt="">`:'<div class="nw-img"></div>'}
+    <div class="nw-t"><b>${esc(n.titulo)}</b><small><span class="etq ${n.tipo==="snapshot"?"snap":""}">${n.tipo==="snapshot"?"Snapshot":"Versión"}</span>${esc(fFecha(n.fecha))}</small></div></button>`).join("")||'<div class="news-msg">No hay noticias por ahora.</div>'}
+$("#nw-ref").onclick=cargarNoticias;
+$("#nw-lista").onclick=async e=>{
+  if(e.target.id==="nw-reint")return cargarNoticias();
+  const b=e.target.closest(".nw");if(!b)return;
+  const m=$("#nw-modal");$("#nw-t").textContent=b.querySelector("b").textContent;$("#nw-f").textContent="";
+  $("#nw-hero").style.backgroundImage=b.querySelector("img")?`url("${b.querySelector("img").src}")`:"none";
+  $("#nw-c").innerHTML='<p>Cargando…</p>';m.classList.add("on");
+  const r=api()?await api().novedad_articulo(b.dataset.id):{ok:true,datos:{html:"<p>Vista previa: aquí aparecen las notas completas de la versión.</p><ul><li>Cambio de ejemplo</li></ul>",fecha:"2026-10-06"}};
+  if(!m.classList.contains("on"))return;
+  if(!r.ok){$("#nw-c").innerHTML=`<p>${esc(r.error)}</p>`;return}
+  $("#nw-f").textContent=fFecha(r.datos.fecha);$("#nw-c").innerHTML=r.datos.html;$("#nw-c").scrollTop=0};
+$("#nw-c").onclick=e=>{const a=e.target.closest("a");if(!a)return;e.preventDefault();if(a.dataset.ext&&api())api().abrir_enlace(a.href)};
+function pintar(){
+  const i=lista[sel];
+  $("#tit").textContent=i?i.nombre:"Sin instancias";
+  $("#meta").textContent=i?`${i.tipo||"Vanilla"} · Minecraft ${i.version_target||i.version_id} · ${i.ram||4} GB de RAM · ${i.mods||0} mods`:"Crea una instancia para empezar a jugar.";
+  $("#usr").textContent="Sesión de "+usuario;
+  $("#chips").innerHTML=lista.map((x,n)=>`<button class="chip ${n==sel?"on":""}" data-n="${n}"><img class="ci" src="${icoSrc(x)}" alt="">${esc(x.nombre)}</button>`).join("");
+  $("#h-ico").style.display=i?"":"none";if(i)$("#h-ico img").src=icoSrc(i);
+  $("#h-upd").classList.toggle("ocu",!(i&&i.pack));
+}
+$("#chips").onclick=e=>{const b=e.target.closest(".chip");if(b&&+b.dataset.n!==sel)vt(()=>{sel=+b.dataset.n;pintar()})};
+$$(".side [data-v]").forEach(b=>b.onclick=()=>{vt(()=>irA(b.dataset.v));if(b.dataset.v==="crear"&&!$("#c-ver").options.length)cargarVersiones(tipo);if(b.dataset.v==="packs")abrirContenido();if(b.dataset.v==="aj")pintarCF()});
+async function entrar(e){
+  const n=$("#nick").value.trim();
+  if(!n){const i=$("#nick");i.classList.remove("err");void i.offsetWidth;i.classList.add("err");return}
+  usuario=n;const r=e.currentTarget.getBoundingClientRect();
+  const est=api()?await api().estado():{instancias:[{nombre:"Mi Survival",tipo:"Vanilla",version_id:"1.20.1",ram:"4"},{nombre:"Modpack Forge",tipo:"Forge",version_id:"1.20.1-forge",ram:"6"}],config:{}};
+  await cargarIconos();if(!cIcono)cIcono=icos[0]||"";pintarCIcono();cargarNoticias();
+  lista=est.instancias;anim=est.config.animaciones!==false;$("#swa").classList.toggle("on",anim);
+  vt(()=>{$("#login").style.display="none";$("#app").style.display="block";pintar()},"reveal",r.left+r.width/2,r.top+r.height/2);
+}
+$("#entrar").onclick=entrar;$("#nick").onkeydown=e=>{if(e.key==="Enter")$("#entrar").click()};
+$("#salir").onclick=()=>vt(()=>{$("#app").style.display="none";$("#login").style.display="block"});
+$("#swa").onclick=()=>{anim=!anim;$("#swa").classList.toggle("on",anim);api()&&api().config_guardar("animaciones",anim)};
+/* ---- Tema: modo claro / oscuro / OLED / auto, colores, fondo (imagen o GIF) ---- */
+const PRESETS=[["Violeta","#8b5cf6",""],["Océano","#3b82f6",""],["Cian","#06b6d4",""],["Esmeralda","#10b981",""],["Lima","#84cc16",""],["Ámbar","#f59e0b",""],
+  ["Naranja","#f97316",""],["Rosa","#ec4899",""],["Rojo","#ef4444",""],["Grafito","#94a3b8",""],
+  ["Atardecer","#f97316","#ec4899"],["Aurora","#10b981","#3b82f6"],["Neón","#a855f7","#06b6d4"],["Lava","#ef4444","#f59e0b"]];
+const T0={modo:"oscuro",acento:"#8b5cf6",acento2:"",fondo:{tipo:"default",archivo:""},velo:100,desenfoque:0};
+const PAL={ /* t = cuánto se tiñen fondo, panel, campos y líneas con el color del tema */
+  oscuro:{bg:[11,10,16],panel:[20,18,28],in:[13,12,20],linea:[42,38,56],txt:[241,238,251],tenue:[154,148,179],fg:[255,255,255],t:[.05,.08,.06,.12],dark:1,err:"#f87171",warn:"#fbbf24"},
+  oled:{bg:[0,0,0],panel:[10,10,12],in:[6,6,8],linea:[34,34,40],txt:[244,244,247],tenue:[140,140,152],fg:[255,255,255],t:[0,.03,.02,.06],dark:1,err:"#f87171",warn:"#fbbf24"},
+  claro:{bg:[243,241,248],panel:[255,255,255],in:[250,249,253],linea:[219,215,232],txt:[27,24,48],tenue:[98,92,122],fg:[0,0,0],t:[.06,.02,.03,.1],dark:0,err:"#d92d3a",warn:"#b45309"}};
+let tema=JSON.parse(JSON.stringify(T0)),fondoUrl="",temaListo=false,tTimer=0;
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const rgb2hex=c=>"#"+c.map(v=>v.toString(16).padStart(2,"0")).join("");
+const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+const lum=c=>{const f=v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4};return .2126*f(c[0])+.7152*f(c[1])+.0722*f(c[2])};
+const modoReal=m=>m==="auto"?(matchMedia("(prefers-color-scheme: light)").matches?"claro":"oscuro"):m;
+matchMedia("(prefers-color-scheme: light)").addEventListener?.("change",()=>{if(tema.modo==="auto")aplicarTema()});
+const segundo=(t,P)=>t.acento2?hex2rgb(t.acento2):mix(hex2rgb(t.acento),P.dark?[255,255,255]:[0,0,0],P.dark?.3:.25);
+function aplicarTema(){
+  const t=tema,m=modoReal(t.modo),P=PAL[m],ac=hex2rgb(t.acento),g2=segundo(t,P),r=document.documentElement,v=(k,x)=>r.style.setProperty(k,x);
+  const bg=mix(P.bg,ac,P.t[0]),panel=mix(P.panel,ac,P.t[1]),inn=mix(P.in,ac,P.t[2]),linea=mix(P.linea,ac,P.t[3]);
+  v("--bg",rgb2hex(bg));v("--bg-rgb",bg.join(" "));v("--panel",rgb2hex(panel));v("--panel-rgb",panel.join(" "));
+  v("--in",rgb2hex(inn));v("--in-rgb",inn.join(" "));v("--linea",rgb2hex(linea));v("--fg",P.fg.join(" "));
+  v("--txt",rgb2hex(P.txt));v("--tenue",rgb2hex(P.tenue));v("--err",P.err);v("--warn",P.warn);
+  v("--ac",t.acento);v("--ac-rgb",ac.join(" "));v("--ac2",rgb2hex(t.acento2?g2:mix(ac,P.dark?[255,255,255]:[0,0,0],P.dark?.35:.3)));
+  v("--grad",`linear-gradient(135deg,${t.acento},${rgb2hex(g2)})`);
+  v("--on-ac",lum(ac)>.34?"#14121c":"#fff");
+  v("--vel",t.velo/100);v("--blur",t.desenfoque+"px");v("color-scheme",P.dark?"dark":"light");r.style.colorScheme=P.dark?"dark":"light";
+  r.dataset.modo=m;r.dataset.fondo=t.fondo.tipo==="custom"&&!fondoUrl?"default":t.fondo.tipo;
+  if(t.fondo.tipo==="custom"&&fondoUrl)v("--fondo",`url("${fondoUrl}")`);else r.style.removeProperty("--fondo");
+  document.querySelector('meta[name=theme-color]')?.setAttribute("content",rgb2hex(bg));
+  pintarAjustes();
+}
+function pintarAjustes(){
+  const t=tema,P=PAL[modoReal(t.modo)],g2=rgb2hex(segundo(t,P));
+  $$("#aj-modos .modo").forEach(b=>b.classList.toggle("on",b.dataset.modo===t.modo));
+  $$("#aj-temas .tema").forEach(b=>b.classList.toggle("on",b.dataset.a===t.acento&&b.dataset.b===t.acento2));
+  $("#aj-c1").value=t.acento;$("#aj-c2").value=g2;$("#aj-c2x").disabled=!t.acento2;
+  const f=t.fondo,pr=$("#aj-prev");
+  pr.style.backgroundImage=f.tipo==="custom"&&fondoUrl?`url("${fondoUrl}")`:f.tipo==="default"?"url(bg.png)":"none";
+  pr.style.setProperty("--vel",t.velo/100);
+  $("#aj-prevt").textContent=f.tipo==="custom"?"Mi fondo":f.tipo==="default"?"Predeterminado":"Sin fondo";
+  $$("[data-fo]").forEach(b=>b.classList.toggle("on",b.dataset.fo===f.tipo));$("#fo-cus").disabled=!f.archivo;
+  for(const [id,val,max] of [["velo",t.velo,100],["blur",t.desenfoque,20]]){
+    const e=$("#aj-"+id);e.value=val;e.style.setProperty("--p",val/max*100+"%");$("#aj-"+id+"-v").textContent=id==="velo"?val+"%":val+" px"}
+}
+$("#aj-temas").innerHTML=PRESETS.map(([n,a,b])=>{
+  const g=b||rgb2hex(mix(hex2rgb(a),[255,255,255],.3));
+  return `<button class="tema" title="${n}" data-a="${a}" data-b="${b}" style="--c:${a};--g:linear-gradient(135deg,${a},${g})"></button>`}).join("");
+const fMsg=(t,err)=>{const e=$("#aj-fmsg");e.textContent=t;e.classList.toggle("err",!!err)};
+async function guardarTema(){
+  clearTimeout(tTimer);tTimer=0;if(!api())return;
+  const r=await api().tema_guardar(tema);if(!r.ok)fMsg(r.error,true)}
+const guardarLuego=()=>{clearTimeout(tTimer);tTimer=setTimeout(guardarTema,300)};
+const cambiar=(fn,suave)=>{const h=()=>{fn();aplicarTema()};suave?vt(h):h();guardarLuego()};
+$("#aj-modos").onclick=e=>{const b=e.target.closest("[data-modo]");if(b&&b.dataset.modo!==tema.modo)cambiar(()=>tema.modo=b.dataset.modo,true)};
+$("#aj-temas").onclick=e=>{const b=e.target.closest(".tema");if(b)cambiar(()=>{tema.acento=b.dataset.a;tema.acento2=b.dataset.b},true)};
+$("#aj-c1").oninput=e=>cambiar(()=>tema.acento=e.target.value);
+$("#aj-c2").oninput=e=>cambiar(()=>tema.acento2=e.target.value);
+$("#aj-c2x").onclick=()=>cambiar(()=>tema.acento2="",true);
+$("#aj-rst").onclick=()=>cambiar(()=>{tema.acento=T0.acento;tema.acento2=""},true);
+$("#aj-velo").oninput=e=>cambiar(()=>tema.velo=+e.target.value);
+$("#aj-blur").oninput=e=>cambiar(()=>tema.desenfoque=+e.target.value);
+$$("[data-fo]").forEach(b=>b.onclick=()=>{fMsg("");cambiar(()=>tema.fondo.tipo=b.dataset.fo,true)});
+async function ponerFondo(d){
+  if(fondoUrl){URL.revokeObjectURL(fondoUrl);fondoUrl=""}
+  if(!d)return;
+  const blob=await (await fetch(`data:${d.mime};base64,${d.b64}`)).blob();fondoUrl=URL.createObjectURL(blob)}
+$("#fo-elegir").onclick=async()=>{
+  if(!api())return fMsg("Elegir archivos solo funciona dentro del launcher.",true);
+  const b=$("#fo-elegir");b.disabled=true;fMsg("Cargando imagen…");
+  try{
+    await guardarTema();            // así no se pierden los últimos cambios de los deslizadores
+    const r=await api().fondo_elegir();
+    if(r.cancelado)return fMsg("");
+    if(!r.ok)return fMsg(r.error,true);
+    await ponerFondo(r.datos);tema=r.tema;vt(aplicarTema);fMsg("Fondo aplicado.");
+  }finally{b.disabled=false}};
+async function initTema(){
+  if(temaListo)return;temaListo=true;
+  if(api()){try{const r=await api().tema_obtener();tema=r.tema;anim=r.animaciones;$("#swa").classList.toggle("on",anim);await ponerFondo(await api().fondo_datos())}catch(e){}}
+  aplicarTema()}
+addEventListener("pywebviewready",initTema);
+if(api())initTema();else setTimeout(initTema,400);
+aplicarTema();
+$("#jugar").onclick=()=>{const i=lista[sel];if(!i||jugando)return;api()?api().jugar(i.nombre,usuario):onEstadoJuego(true)};
+$("#min").onclick=()=>api()&&api().minimizar();$("#cer").onclick=()=>api()?api().cerrar():window.close();
+window.onLog=l=>{const r=$("#log");if(r.dataset.v!=="1"){r.textContent="";r.dataset.v="1"}r.textContent+=l+"\n";r.scrollTop=1e9};
+function irA(v){$$(".side [data-v]").forEach(x=>x.classList.toggle("on",x.dataset.v===v));$$(".view").forEach(x=>x.classList.toggle("on",x.id==="v-"+v));$("#chips").style.display=v==="home"?"flex":"none"}
+function pestana(p){$$("[data-p]").forEach(b=>b.classList.toggle("on",b.dataset.p===p));$$(".term").forEach(t=>t.classList.toggle("on",t.id===p))}
+$$("[data-p]").forEach(b=>b.onclick=()=>pestana(b.dataset.p));
+window.onCrash=c=>{$("#crash").textContent=`Versión: ${c.version}\n\n${c.texto}`;vt(()=>{irA("reg");pestana("crash")})};
+/* ---- crear instancia ---- */
+let tipo="Vanilla",instalando=false;
+const estado=(t,err)=>{const e=$("#estado");e.textContent=t;e.classList.toggle("err",!!err)};
+async function cargarVersiones(t){const s=$("#c-ver");s.disabled=true;s.innerHTML="<option>Cargando versiones…</option>";
+  const v=api()?await api().versiones(t):["1.21.1","1.20.1","1.19.4","1.16.5","1.12.2"];
+  s.innerHTML=v.length?v.map(x=>`<option>${x}</option>`).join(""):"<option>Sin versiones (¿sin internet?)</option>";s.disabled=!v.length}
+$("#c-tipo").onclick=e=>{const b=e.target.closest("[data-t]");if(!b)return;if(b.dataset.t===tipo)return;tipo=b.dataset.t;$$("[data-t]").forEach(x=>x.classList.toggle("on",x===b));cargarVersiones(tipo)};
+$("#c-ok").onclick=()=>{
+  const nom=$("#c-nom").value.trim();if(!nom||instalando)return estado(nom?"":"Escribe un nombre para la instancia.",!nom);
+  if($("#c-ver").disabled)return estado("Espera a que cargue la lista de versiones.",true);
+  instalando=true;$("#c-ok").disabled=true;$("#barra").style.display="block";$("#barra i").style.width="0";estado("Preparando…");
+  api()&&api().crear({nombre:nom,tipo,version:$("#c-ver").value,ram:$("#c-ram").value,icono:cIcono});
+};
+window.onProgreso=p=>{estado(p.estado);$("#barra i").style.width=(p.max?Math.round(p.valor/p.max*100):0)+"%"};
+window.onErrorInstalar=m=>{instalando=false;$("#c-ok").disabled=false;$("#barra").style.display="none";estado("No se pudo instalar: "+m,true)};
+window.onInstalada=async n=>{
+  instalando=false;$("#c-ok").disabled=false;$("#barra").style.display="none";$("#c-nom").value="";estado("");
+  lista=(await api().estado()).instancias;sel=Math.max(0,lista.findIndex(i=>i.nombre===n));
+  vt(()=>{irA("home");pintar()},"reveal")};
+$("#carp").onclick=()=>{const i=lista[sel];if(i&&api())api().abrir_carpeta(i.nombre)};
+$("#elim").onclick=async()=>{const i=lista[sel];if(!i||!confirm(`¿Eliminar '${i.nombre}'? Se borrará la instancia con sus mods y mundos.`))return;
+  api()&&await api().eliminar(i.nombre);lista.splice(sel,1);sel=0;vt(pintar)};
+/* ---- Centro de contenido: modpacks, mods, resource packs, data packs y shaders ---- */
+const fmtN=n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?Math.round(n/1e3)+"k":String(n);
+const ETQ={modpack:"Modpack",mod:"Mod",resourcepack:"Resource Pack",datapack:"Data Pack",shader:"Shader"};
+const PLU={modpack:"modpacks",mod:"mods",resourcepack:"resource packs",datapack:"data packs",shader:"shaders"};
+const CAT_ES={adventure:"Aventura",challenging:"Desafiante",combat:"Combate","kitchen-sink":"Kitchen Sink",lightweight:"Ligero",magic:"Magia",multiplayer:"Multijugador",optimization:"Optimización",quests:"Misiones",technology:"Tecnología"};
+const nombreCat=c=>CAT_ES[c]||c.charAt(0).toUpperCase()+c.slice(1).replace(/-/g," ");
+const LOADER_DE={Forge:"forge",NeoForge:"neoforge",Fabric:"fabric",Quilt:"quilt"};
+const loaderDe=i=>i?(i.loader||LOADER_DE[i.tipo]||""):"";
+const instActual=()=>lista.find(i=>i.nombre===$("#m-inst").value);
+let pFuente="modrinth",pTipo="modpack",cTab="exp",pOcupado=false,pPag=0,pTotal=0,pSeq=0,pTimer=0,pVerCargadas=false,pSucio=false;
+let modsInst="",modsLoader="",modsUpd={};
+const pFil={loaders:new Set(),cats:new Set()};
+const pInfo=(t,err)=>{const e=$("#p-estado");e.textContent=t;e.classList.toggle("err",!!err)};
+const mInfo=(t,err)=>{const e=$("#m-info");e.textContent=t;e.classList.toggle("err",!!err)};
+function pBloquear(b){pOcupado=b;$("#p-barra").style.display=b?"block":"none";if(b)$("#p-barra i").style.width="0";
+  $$("#c-exp .mini,#p-imp").forEach(x=>x.disabled=b||x.dataset.hecho==="1")}
+const SVG='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+const IC_DL=SVG+'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>',IC_US=SVG+'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
+const cdn=u=>typeof u==="string"&&(u.startsWith("https://cdn.modrinth.com/")||/^https:\/\/[\w-]+\.forgecdn\.net\//.test(u));
+function llenarInstancias(){
+  const s=$("#m-inst"),prev=s.value;
+  s.innerHTML=lista.map(i=>`<option value="${esc(i.nombre)}">${esc(i.nombre)}</option>`).join("");
+  const cur=lista.find(i=>i.nombre===prev)||lista[sel];if(cur)s.value=cur.nombre}
+function ajustarPanel(){
+  const cfu=pFuente==="curseforge";
+  $("#p-sec-load").classList.toggle("ocu",pTipo!=="modpack"&&pTipo!=="mod");
+  $("#p-sec-cat").classList.toggle("ocu",cfu);$("#p-cf-nota").classList.toggle("ocu",!cfu);
+  $$("#p-fil [data-ty]").forEach(x=>{if(["resourcepack","datapack","shader"].includes(x.dataset.ty))x.classList.toggle("ocu",cfu)});
+  $("#p-instbox").classList.toggle("ocu",cTab==="exp"&&pTipo==="modpack");
+  $("#p-q").placeholder=`Buscar ${PLU[pTipo]}…`;$("#p-tit").textContent=ETQ[pTipo];$("#m-loader").textContent=loaderDe(instActual())||(lista.length?"vanilla":"")}
+async function cargarVersionesJuego(){
+  if(pVerCargadas||!api())return;pVerCargadas=true;
+  const r=await api().contenido_versiones_juego();
+  if(!r.ok){pVerCargadas=false;return}
+  const s=$("#p-ver"),cur=s.value;
+  s.insertAdjacentHTML("beforeend",r.datos.map(v=>`<option>${esc(v)}</option>`).join(""));s.value=cur}
+async function cargarCategorias(t){
+  const box=$("#p-cats");box.innerHTML="";if(!api())return;
+  if(pFuente==="curseforge")return;const r=await api().contenido_categorias(t,pFuente);if(t!==pTipo||!r.ok)return;
+  box.innerHTML=r.datos.map(c=>`<button class="fchip ${pFil.cats.has(c)?"on":""}" data-c="${esc(c)}">${esc(nombreCat(c))}</button>`).join("")}
+/* Para mods, resource packs, etc. el buscador parte de la versión (y loader) de la instancia elegida */
+function aplicarContexto(){
+  pFil.loaders.clear();$$("#p-fil [data-l]").forEach(x=>x.classList.remove("on"));
+  const sv=$("#p-ver"),i=instActual();let v="";
+  if(pTipo!=="modpack"&&i){
+    v=i.version_target||"";
+    if(v&&![...sv.options].some(o=>o.value===v))sv.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`);
+    const l=loaderDe(i);
+    if(pTipo==="mod"&&l)(l==="quilt"&&pFuente!=="curseforge"?["quilt","fabric"]:[l]).forEach(x=>{pFil.loaders.add(x);$(`#p-fil [data-l="${x}"]`).classList.add("on")})}
+  sv.value=v}
+function cambiarTipo(t){
+  pTipo=t;$$("#p-fil [data-ty]").forEach(x=>x.classList.toggle("on",x.dataset.ty===t));
+  pFil.cats.clear();ajustarPanel();aplicarContexto();cargarCategorias(t);buscarPacks(0)}
+function cambiarFuente(f){
+  pFuente=f;$$("#p-fil [data-fu]").forEach(x=>x.classList.toggle("on",x.dataset.fu===f));
+  if(f==="curseforge"&&pTipo!=="modpack"&&pTipo!=="mod")return cambiarTipo("modpack");
+  pFil.cats.clear();ajustarPanel();aplicarContexto();cargarCategorias(pTipo);buscarPacks(0)}
+function refrescarExplorar(){pSucio=false;if(pTipo!=="modpack")aplicarContexto();buscarPacks(0)}
+async function abrirContenido(){
+  llenarInstancias();cargarVersionesJuego();ajustarPanel();
+  if(!$("#p-cats").children.length)cargarCategorias(pTipo);
+  if(cTab==="inst")await pintarMods();
+  if(cTab==="exp"&&!$("#p-res").children.length)buscarPacks(0)}
+function tarjetaPack(x,t){
+  const fondo=Number.isInteger(x.color)?`style="background:linear-gradient(135deg,#${(x.color&0xffffff).toString(16).padStart(6,"0")}88,#14121c)"`:"";
+  const acc=t==="modpack"?"elegir":t==="datapack"?"mundo":"inst";
+  return `<div class="pk-card" data-id="${esc(x.id)}" data-ti="${esc(x.titulo)}">
+    <div class="pk-banner" ${fondo}>${cdn(x.galeria)?`<img loading="lazy" src="${esc(x.galeria)}" alt="">`:""}</div>
+    ${cdn(x.icono)?`<img class="ico pk-ico" loading="lazy" src="${esc(x.icono)}" alt="">`:'<div class="ico pk-ico"></div>'}
+    <div class="pk-cuerpo"><div class="pk-t"><b title="${esc(x.titulo)}">${esc(x.titulo)}</b><span>${IC_DL}${fmtN(x.descargas)}</span></div>
+      <p>${esc(x.descripcion)}${x.descarga_bloqueada?' <span class="bloq">· descarga limitada por el autor</span>':""}</p>
+      <div class="pk-pie"><small>${IC_US}${esc(x.autor)}</small>
+        <button class="mini" data-a="${acc}" ${x.instalado?'disabled data-hecho="1"':pOcupado?"disabled":""}>${x.instalado?"Instalado":IC_DL+"Instalar"}</button></div>
+      <div class="pexp ocu"></div></div></div>`}
+async function buscarPacks(pag){
+  const R=$("#p-res");if(!api())return;const mi=++pSeq,t=pTipo;
+  if(!pag)R.innerHTML='<div class="vacio">Buscando…</div>';
+  const inst=t==="modpack"?"":$("#m-inst").value;
+  const r=await api().contenido_buscar(t,$("#p-q").value.trim(),pag,$("#p-ord").value,$("#p-ver").value,[...pFil.loaders],[...pFil.cats],inst,pFuente);
+  if(mi!==pSeq)return;
+  if(!r.ok){if(!pag)R.innerHTML="";return pInfo(r.error,true)}
+  pInfo("");pPag=pag;pTotal=r.datos.total;if(!pag)R.innerHTML="";R.querySelector("#p-mas")?.remove();
+  $("#p-total").textContent=`(${pTotal.toLocaleString("es")} resultados)`;
+  if(!pag&&!r.datos.resultados.length)R.innerHTML=`<div class="vacio">No encontré ${PLU[t]} con esa búsqueda o filtros.</div>`;
+  R.insertAdjacentHTML("beforeend",r.datos.resultados.map(x=>tarjetaPack(x,t)).join(""));
+  if((pag+1)*20<pTotal)R.insertAdjacentHTML("beforeend",'<button class="mini sec pk-mas" id="p-mas">Cargar más</button>')}
+$("#p-q").oninput=()=>{clearTimeout(pTimer);pTimer=setTimeout(()=>buscarPacks(0),350)};
+$("#p-q").onkeydown=e=>{if(e.key==="Enter"){clearTimeout(pTimer);buscarPacks(0)}};
+$("#p-ord").onchange=$("#p-ver").onchange=()=>buscarPacks(0);
+$("#p-fil").onclick=e=>{
+  const fu=e.target.closest("[data-fu]");
+  if(fu){if(fu.dataset.fu!==pFuente)cambiarFuente(fu.dataset.fu);return}
+  const t=e.target.closest("[data-ty]");
+  if(t){if(t.dataset.ty!==pTipo)cambiarTipo(t.dataset.ty);return}
+  const b=e.target.closest(".fchip");
+  if(b){if(b.dataset.l&&pFuente==="curseforge"&&!pFil.loaders.has(b.dataset.l)){pFil.loaders.clear();$$("#p-fil [data-l]").forEach(x=>x.classList.remove("on"))}
+    const set=b.dataset.l?pFil.loaders:pFil.cats,v=b.dataset.l||b.dataset.c;
+    set.has(v)?set.delete(v):set.add(v);b.classList.toggle("on");return buscarPacks(0)}
+  if(e.target.closest("#p-limpiar")){pFil.loaders.clear();pFil.cats.clear();$$("#p-fil .fchip:not([data-ty])").forEach(x=>x.classList.remove("on"));$("#p-ver").value="";buscarPacks(0)}
+};
+$$(".vista button").forEach(b=>b.onclick=()=>{$$(".vista button").forEach(x=>x.classList.toggle("on",x===b));$("#p-res").classList.toggle("lista",b.dataset.vista==="lista")});
+$$(".ctabs [data-ct]").forEach(b=>b.onclick=async()=>{
+  cTab=b.dataset.ct;$$(".ctabs [data-ct]").forEach(x=>x.classList.toggle("on",x===b));
+  $("#c-exp").classList.toggle("ocu",cTab!=="exp");$("#c-inst").classList.toggle("ocu",cTab!=="inst");
+  $(".pk").classList.toggle("inst",cTab==="inst");ajustarPanel();
+  if(cTab==="inst")await pintarMods();else if(pSucio)refrescarExplorar()});
+$("#m-inst").onchange=async()=>{modsUpd={};pSucio=true;ajustarPanel();if(cTab==="exp")refrescarExplorar();else await pintarMods()};
+function msgInstalado(d,t){
+  return(d.instalados.length?`Instalado: ${d.instalados.join(", ")}`:"Ya estaba instalado")
+    +(d.dependencias.length?` · dependencias: ${d.dependencias.join(", ")}`:"")
+    +(d.sin_version.length?` · sin versión compatible: ${d.sin_version.join(", ")}`:"")
+    +(t==="shader"?" · los shaders necesitan Iris u OptiFine para verse en el juego":"")}
+async function instalarContenido(btn,fila,mundo){
+  const nom=$("#m-inst").value,t=pTipo,fu=pFuente;
+  if(!nom)return pInfo("Primero crea o elige una instancia donde instalarlo.",true);
+  if(fila.dataset.busy)return;fila.dataset.busy="1";
+  fila.querySelector(".pexp").classList.add("ocu");btn.classList.remove("ocu");btn.disabled=true;btn.textContent="Instalando…";
+  const r=await api().contenido_instalar(nom,t,fila.dataset.id,fila.dataset.ti,mundo,fu);
+  delete fila.dataset.busy;
+  if(!r.ok){btn.disabled=false;btn.innerHTML=IC_DL+"Instalar";return pInfo(r.error,true)}
+  btn.textContent="Instalado";btn.dataset.hecho="1";pInfo(msgInstalado(r.datos,t));await refrescarLista()}
+$("#p-res").onclick=async e=>{
+  if(e.target.id==="p-mas"){e.target.disabled=true;e.target.textContent="Cargando…";return buscarPacks(pPag+1)}
+  const b=e.target.closest("button[data-a]");if(!b||b.disabled||!api()||pOcupado)return;
+  const fila=b.closest(".pk-card"),box=fila.querySelector(".pexp"),a=b.dataset.a,btn0=fila.querySelector(".pk-pie .mini");
+  if(a==="elegir"){
+    b.disabled=true;b.textContent="Cargando…";
+    const r=await api().modpack_versiones(fila.dataset.id,pFuente);b.disabled=false;b.innerHTML=IC_DL+"Instalar";
+    if(!r.ok)return pInfo(r.error,true);
+    if(!r.datos.length)return pInfo(pFuente==="curseforge"?"Ese modpack no tiene versiones instalables (.zip).":"Ese modpack no tiene versiones instalables (.mrpack).",true);
+    box.innerHTML=`<select data-k="v">${r.datos.map(v=>`<option value="${esc(v.id)}">${esc(v.nombre)} · MC ${esc(v.mc)} · ${esc(v.loaders.join("/"))}${v.tipo!=="release"?" ("+esc(v.tipo)+")":""}</option>`).join("")}</select>
+      <input data-k="n" maxlength="30" value="${esc(fila.dataset.ti.slice(0,30))}" title="Nombre de la instancia">
+      <select data-k="r" title="Memoria RAM"><option value="4">4 GB</option><option value="6" selected>6 GB</option><option value="8">8 GB</option></select>
+      <button class="mini" data-a="ok">Instalar modpack</button><button class="mini sec" data-a="no">Cancelar</button>`;
+    box.classList.remove("ocu");b.classList.add("ocu");
+  }else if(a==="inst")await instalarContenido(b,fila,"");
+  else if(a==="mundo"){
+    const nom=$("#m-inst").value;if(!nom)return pInfo("Primero crea o elige una instancia donde instalarlo.",true);
+    b.disabled=true;b.textContent="Cargando…";
+    const r=await api().contenido_mundos(nom);b.disabled=false;b.innerHTML=IC_DL+"Instalar";
+    if(!r.ok)return pInfo(r.error,true);
+    if(!r.datos.length)return pInfo("Esa instancia aún no tiene mundos. Crea uno en el juego y vuelve.",true);
+    box.innerHTML=`<select data-k="w" title="Mundo">${r.datos.map(w=>`<option>${esc(w)}</option>`).join("")}</select>
+      <button class="mini" data-a="okm">Instalar en este mundo</button><button class="mini sec" data-a="no">Cancelar</button>`;
+    box.classList.remove("ocu");b.classList.add("ocu");
+  }else if(a==="okm")await instalarContenido(btn0,fila,box.querySelector('[data-k="w"]').value);
+  else if(a==="no"){box.classList.add("ocu");btn0.classList.remove("ocu")}
+  else if(a==="ok"){
+    const v=box.querySelector('[data-k="v"]').value,n=box.querySelector('[data-k="n"]').value.trim(),ram=box.querySelector('[data-k="r"]').value;
+    pBloquear(true);pInfo("Preparando…");
+    const r=await api().modpack_instalar(v,n,ram,pFuente,fila.dataset.id);if(!r.ok){pBloquear(false);pInfo(r.error,true)}
+  }
+};
+/* ---- Mods instalados de la instancia elegida ---- */
+async function pintarMods(){
+  const nom=$("#m-inst").value,L=$("#m-lista");modsInst=nom;modsLoader="";
+  $("#m-add").disabled=$("#m-dir").disabled=!nom;
+  if(!nom){$("#m-loader").textContent="";L.innerHTML='<div class="vacio">Crea una instancia con Forge, NeoForge o Fabric para poder usar mods.</div>';return mInfo("")}
+  const r=api()?await api().mods(nom):{loader:"forge",tipo:"Forge",mods:[]};
+  if(nom!==modsInst)return;
+  if(r.error){L.innerHTML="";return mInfo(r.error,true)}
+  $("#m-loader").textContent=r.loader||"Vanilla";modsLoader=r.loader||"";
+  if(!r.loader){$("#m-add").disabled=true;mInfo("");L.innerHTML='<div class="vacio">Una instancia <b>Vanilla</b> no carga mods.<br>Crea una con Forge, NeoForge o Fabric.</div>';return}
+  const m=r.mods,on=m.filter(x=>x.activo).length;
+  mInfo(m.length?`${m.length} mods · ${on} activos`:"");
+  L.innerHTML=m.length?m.map(x=>`<div class="mod ${x.activo?"":"off"}" data-f="${esc(x.archivo)}">
+      <div class="sw ${x.activo?"on":""}" data-a="act" title="${x.activo?"Desactivar":"Activar"}"></div>
+      <div class="n"><b>${esc(x.nombre)}${x.version?` <span style="color:var(--tenue);font-weight:400">${esc(x.version)}</span>`:""}</b><small>${esc(x.descripcion||x.archivo)}</small></div>
+      ${x.aviso?`<span class="aviso ${x.nivel}" title="${esc(x.aviso)}">${x.nivel==="bad"?"✕":"⚠"} ${esc(x.aviso)}</span>`:""}
+      ${modsUpd[x.archivo]?`<button class="mini" data-a="upd" title="Actualizar a ${esc(modsUpd[x.archivo].nueva)}">↑ ${esc(modsUpd[x.archivo].nueva)}</button>`:""}
+      <button class="x" data-a="del" title="Eliminar">✕</button></div>`).join("")
+    :'<div class="vacio">Esta instancia no tiene mods.<br>Arrastra archivos <b>.jar</b> a la ventana, pulsa <b>Añadir .jar</b> o instálalos desde Explorar → Mod.</div>';
+}
+$("#m-lista").onclick=async e=>{
+  const b=e.target.closest("[data-a]");if(!b||!api())return;
+  const f=b.closest(".mod").dataset.f,nom=modsInst,a=b.dataset.a;let msg="";
+  if(a==="act"){const r=await api().mod_activar(nom,f,!b.classList.contains("on"));if(!r.ok)mInfo(r.error,true)}
+  else if(a==="del"){if(!confirm(`¿Eliminar '${f}' de la instancia?`))return;const r=await api().mod_borrar(nom,f);if(!r.ok)mInfo(r.error,true)}
+  else if(a==="upd"){
+    const u=modsUpd[f];if(!u)return;b.disabled=true;b.textContent="Actualizando…";
+    const r=await api().modrinth_actualizar(nom,f,u.version_id);
+    if(!r.ok){mInfo(r.error,true);b.disabled=false;b.textContent="↑ "+u.nueva;return}
+    delete modsUpd[f];msg=`Actualizado a ${u.nueva}`}
+  await refrescarLista();await pintarMods();if(msg)mInfo(msg);
+};
+async function refrescarLista(){if(!api())return;const n=lista[sel]&&lista[sel].nombre;lista=(await api().estado()).instancias;sel=Math.max(0,lista.findIndex(i=>i.nombre===n))}
+function resultadoAnadir(r){
+  if(!r.ok)return mInfo(r.error,true);
+  const o=r.omitidos.map(x=>`${x[0]} (${x[1]})`).join(", ");
+  mInfo(`${r.copiados.length} añadidos`+(o?` · omitidos: ${o}`:""),!!o&&!r.copiados.length);
+}
+$("#m-add").onclick=async()=>{if(!modsInst||!api())return;const r=await api().mod_anadir_dialogo(modsInst);if(r&&(r.copiados||[]).length+(r.omitidos||[]).length){await refrescarLista();await pintarMods();resultadoAnadir(r)}};
+$("#m-dir").onclick=()=>{if(modsInst&&api())api().abrir_carpeta(modsInst,"mods")};
+$("#m-upd").onclick=async()=>{
+  if(!modsInst||!modsLoader||!api())return mInfo("Elige una instancia con loader de mods.",true);
+  const b=$("#m-upd");b.disabled=true;b.textContent="Buscando…";
+  const r=await api().modrinth_actualizaciones(modsInst);b.disabled=false;b.textContent="Buscar actualizaciones";
+  if(!r.ok)return mInfo(r.error,true);
+  modsUpd=Object.fromEntries(r.datos.map(u=>[u.archivo,u]));
+  await pintarMods();mInfo(r.datos.length?`${r.datos.length} actualizaciones disponibles`:"Todo está al día ✓");
+};
+const enInstalados=()=>$("#v-packs").classList.contains("on")&&cTab==="inst";
+window.onArchivosSoltados=async rutas=>{
+  document.body.classList.remove("arrastrando");
+  if(!enInstalados()||!modsInst||!modsLoader||!api())return;
+  const r=await api().mod_anadir_rutas(modsInst,rutas);await refrescarLista();await pintarMods();resultadoAnadir(r)};
+addEventListener("dragenter",e=>{if(enInstalados()&&e.dataTransfer&&[...e.dataTransfer.types].includes("Files"))document.body.classList.add("arrastrando")});
+addEventListener("dragleave",e=>{if(!e.relatedTarget)document.body.classList.remove("arrastrando")});
+addEventListener("dragover",e=>e.preventDefault());addEventListener("drop",e=>{e.preventDefault();document.body.classList.remove("arrastrando")});
+/* ---- Modpacks: importar .mrpack y progreso ---- */
+$("#p-imp").onclick=async()=>{
+  if(pOcupado||!api())return;pBloquear(true);pInfo("Elige el archivo .mrpack…");
+  const r=await api().modpack_importar_dialogo();
+  if(!r.ok){pBloquear(false);pInfo(r.cancelado?"":r.error,!r.cancelado)}
+};
+async function pintarCF(){
+  if(!api())return;const r=await api().curseforge_estado(),m=$("#cf-msg");m.classList.remove("err");
+  m.textContent=r.clave?"Clave guardada ✓":"Todavía no hay clave: sin ella no se puede usar CurseForge."}
+async function cfGuardar(valor){
+  const r=await api().config_guardar("curseforge_key",valor),m=$("#cf-msg");
+  if(!r.ok){m.classList.add("err");m.textContent=r.error;return}
+  $("#cf-key").value="";pintarCF()}
+$("#cf-guardar").onclick=()=>{const v=$("#cf-key").value.trim();if(v&&api())cfGuardar(v)};
+$("#cf-quitar").onclick=()=>{if(api())cfGuardar("")};
+window.onProgresoPack=p=>{pInfo(p.estado);const pc=(p.max?Math.round(p.valor/p.max*100):0)+"%";$("#p-barra i").style.width=pc;
+  if($("#up-modal").classList.contains("on")){$("#up-est").textContent=p.estado;$("#up-est").classList.remove("err");$("#up-barra i").style.width=pc}};
+window.onPackError=m=>{pBloquear(false);
+  if($("#up-modal").classList.contains("on")){$("#up-barra").style.display="none";$("#up-est").textContent="No se pudo actualizar: "+m+" No se ha cambiado nada de tu instancia.";$("#up-est").classList.add("err");return}
+  pInfo("No se pudo instalar el modpack: "+m,true)};
+let flNombre="";
+function mostrarFaltantes(n,fl){
+  flNombre=n;$("#fl-lista").innerHTML=fl.map(x=>`<div class="fl-fila"><b title="${esc(x.path)}">${esc(x.nombre)}</b>${x.url?`<button class="mini sec" data-u="${esc(x.url)}">Abrir página</button>`:""}</div>`).join("");
+  $("#fl-modal").classList.add("on")}
+$("#fl-lista").onclick=e=>{const b=e.target.closest("[data-u]");if(b&&api())api().abrir_enlace(b.dataset.u)};
+$("#fl-carp").onclick=()=>{if(api()&&flNombre)api().abrir_carpeta(flNombre,"mods")};
+window.onPackListo=async r=>{
+  const n=typeof r==="string"?r:r.nombre,fl=(r&&r.faltantes)||[];
+  pBloquear(false);pInfo(`Modpack instalado como '${n}' ✓`+(fl.length?` · hay ${fl.length} archivo(s) que descargar a mano`:""));
+  lista=(await api().estado()).instancias;sel=Math.max(0,lista.findIndex(i=>i.nombre===n));
+  vt(()=>{irA("home");pintar()},"reveal");if(fl.length)mostrarFaltantes(n,fl)};
+/* ---- actualizar el modpack de la instancia elegida ---- */
+let upNombre="",upMc="";
+const upMsg=(t,err)=>{$("#up-msg").textContent=t;$("#up-msg").style.color=err?"var(--err)":""};
+function upAviso(){
+  const o=$("#up-sel").selectedOptions[0],mc=o&&o.dataset.mc,a=$("#up-aviso"),cambia=mc&&mc!=="?"&&upMc&&mc!==upMc;
+  a.classList.toggle("warn",!!cambia);
+  a.textContent=cambia?`⚠ Esta versión cambia Minecraft de ${upMc} a ${mc}. Haz una copia de tus mundos antes: pueden no abrirse bien.`
+    :"Se conservan tus mundos, tus mods añadidos y las configuraciones que hayas modificado. Si algo falla, no se cambia nada."}
+$("#up-sel").onchange=upAviso;
+$("#h-upd").onclick=async()=>{
+  const i=lista[sel];if(!i||!i.pack||!api()||pOcupado)return;
+  upNombre=i.nombre;$("#up-t").textContent=`Actualizar «${i.nombre}»`;
+  $("#up-form").classList.add("ocu");$("#up-barra").style.display="none";$("#up-est").textContent="";$("#up-est").classList.remove("err");
+  upMsg("Buscando versiones nuevas…");$("#up-modal").classList.add("on");
+  const r=await api().modpack_actualizacion(i.nombre);
+  if(!r.ok)return upMsg(r.error,true);
+  const d=r.datos;
+  if(!d.nuevas.length)return upMsg(`Ya tienes la última versión (${d.actual||"instalada"}) ✓`);
+  upMc=d.mc_actual;$("#up-act").textContent=d.actual||"—";
+  $("#up-sel").innerHTML=d.nuevas.map(v=>`<option value="${esc(v.id)}" data-mc="${esc(v.mc)}">${esc(v.nombre)} · MC ${esc(v.mc)}${v.tipo!=="release"?" ("+esc(v.tipo)+")":""}</option>`).join("");
+  $("#up-sel").value=d.sugerida||d.nuevas[0].id;upAviso();upMsg("");$("#up-form").classList.remove("ocu")};
+$("#up-ok").onclick=async()=>{
+  if(!api()||pOcupado)return;
+  const r=await api().modpack_actualizar(upNombre,$("#up-sel").value);
+  if(!r.ok)return upMsg(r.error,true);
+  pBloquear(true);$("#up-form").classList.add("ocu");upMsg("");$("#up-barra").style.display="block";$("#up-barra i").style.width="0";$("#up-est").textContent="Preparando…"};
+window.onPackActualizado=async r=>{
+  pBloquear(false);$("#up-barra").style.display="none";
+  lista=(await api().estado()).instancias;sel=Math.max(0,lista.findIndex(i=>i.nombre===r.nombre));pintar();
+  const fl=r.faltantes||[];
+  $("#up-est").classList.remove("err");
+  $("#up-est").textContent=`Actualizado a ${r.version} ✓ · ${r.anadidos} archivos añadidos o cambiados, ${r.quitados} quitados`+(r.conservados?`, ${r.conservados} configuraciones tuyas conservadas`:"")+(fl.length?` · ${fl.length} hay que descargarlos a mano`:"")+".";
+  if(fl.length){$("#up-modal").classList.remove("on");mostrarFaltantes(r.nombre,fl)}};
+window.onEstadoJuego=v=>{jugando=v;const b=$("#jugar");b.disabled=v;b.textContent=v?"Jugando…":"Jugar"};
+</script></body></html>
