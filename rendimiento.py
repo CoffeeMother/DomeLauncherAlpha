@@ -1,13 +1,4 @@
-"""
-Rendimiento: RAM a la medida, descargas en paralelo, argumentos de JVM optimizados y GPU dedicada.
 
-- RAM: cualquier cantidad en GB (admite decimales, p. ej. 6.5) entre 0.5 GB y la RAM física del equipo.
-- Descargas: nº de hilos para librerías, assets y archivos de modpacks (1-32).
-- JVM optimizada: G1 afinado (flags tipo Aikar) y heap inicial moderado para que el juego arranque antes.
-- GPU: en Windows marca java como «alto rendimiento» (la misma opción de Configuración > Pantalla > Gráficos);
-  en Linux activa PRIME offload. En portátiles con dos gráficas hace que Minecraft use la dedicada.
-Todo se guarda en launcher_config.json bajo la clave "rendimiento".
-"""
 import os, sys, shutil, threading
 import nucleo as nu
 import tema as tm
