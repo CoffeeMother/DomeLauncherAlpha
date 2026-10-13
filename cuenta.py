@@ -5,7 +5,7 @@ import nucleo as nu
 
 RUTA = os.path.join(nu.BASE, "cuenta.json")
 REDIRECT = "https://login.live.com/oauth20_desktop.srf"
-CLIENT_ID_INTEGRADO = "b0089c24-3d3b-4e3d-88d8-be58a39f4f6d"             # opcional: pon aquí el Client ID de tu app si repartes el launcher
+CLIENT_ID_INTEGRADO = ""             # opcional: pon aquí el Client ID de tu app si repartes el launcher
 _GUID = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 _NOMBRE = re.compile(r"[A-Za-z0-9_]{1,16}")
 _HEX32 = re.compile(r"[0-9a-fA-F]{32}")
