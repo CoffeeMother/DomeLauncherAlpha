@@ -1,14 +1,4 @@
-"""
-Cliente de Modrinth para Dome Launcher (API v2, gratuita y sin clave).
 
-- Busca mods compatibles con el loader y la versión de Minecraft de la instancia.
-- Instala el mod y sus dependencias obligatorias, verificando el hash SHA-512 de cada archivo.
-- Detecta actualizaciones de los mods ya instalados (por hash, sirve incluso para mods que
-  pusiste a mano) y los actualiza.
-
-Seguridad: solo se descarga por https desde los servidores de archivos de Modrinth, el nombre del
-archivo se limpia y, si el hash no coincide, el archivo se descarta.
-"""
 import os, json, hashlib, urllib.parse
 import requests
 import nucleo as nu
