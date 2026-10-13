@@ -1,25 +1,4 @@
-"""
-Modpacks para Dome Launcher: instala y ACTUALIZA modpacks como instancias.
 
-Formatos:
-  Modrinth (.mrpack)   modrinth.index.json + overrides/ + client-overrides/
-  CurseForge (.zip)    manifest.json + overrides/   (ver curseforge.py)
-Los dos se convierten a un mismo "índice" interno, así que instalar y actualizar funcionan igual.
-
-Cada instancia instalada desde Modrinth/CurseForge guarda:
-  - en instancias.json -> "pack": {fuente, proyecto, version_id, version, mc, tipo, loader_version}
-  - en su carpeta      -> dome_pack.json: qué archivos puso el modpack (con su hash) y el hash de
-                          cada archivo de configuración (overrides) tal como lo dejó el modpack.
-
-Actualizar (mantiene tus datos):
-  * Mundos, capturas, mods que añadiste tú y configs que hayas editado NO se tocan.
-  * Los mods del modpack se descargan primero a una carpeta temporal; solo si todo salió bien se
-    mueven a su sitio y se borran los que el modpack ya no incluye. Si algo falla, no cambia nada.
-  * Una config del modpack solo se sobrescribe si sigue igual que cuando se instaló.
-
-Seguridad: cada archivo se verifica con su hash, las rutas se validan (nada puede escribirse fuera
-de la carpeta de la instancia) y solo se aceptan los servidores permitidos.
-"""
 import os, re, json, zipfile, hashlib, shutil, tempfile, threading, urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 import nucleo as nu
