@@ -1,11 +1,4 @@
-"""
-Noticias oficiales de Minecraft: Java (notas de versión y snapshots) desde el servidor de contenido
-del launcher oficial de Mojang (launchercontent.mojang.com).
 
-- Se guarda una copia en disco: si no hay internet se muestra la última que se bajó.
-- El texto de cada nota viene en HTML: se limpia con una lista de etiquetas permitidas antes de
-  llegar a la interfaz (sin scripts, sin atributos raros, enlaces e imágenes solo de dominios oficiales).
-"""
 import os, re, json, time, html, urllib.parse
 from html.parser import HTMLParser
 import requests
