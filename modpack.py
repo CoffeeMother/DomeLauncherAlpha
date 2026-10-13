@@ -22,7 +22,7 @@ def _host_ok(h):
     return h in HOSTS_PACK or str(h or "").endswith(".forgecdn.net")
 
 
-# --------------------------------------------------------------- lectura
+
 def leer_indice(ruta):
     """Valida el .mrpack y devuelve el índice común {nombre, mc, tipo, loader_version, archivos, prefijos}."""
     try:
@@ -81,7 +81,7 @@ def _registro_archivos(pendientes):
     return {a["path"]: {**_hash_de(a), "manual": bool(a.get("manual") and not a.get("downloads"))} for a in pendientes if a.get("path")}
 
 
-# ------------------------------------------------------------- descargas
+
 def _bajar(a, base, cb_sumar, faltantes):
     destino = _ruta_segura(base, a.get("path", ""))
     if destino is None: raise ErrorPack(f"Ruta no permitida dentro del modpack: {a.get('path')}")
@@ -131,7 +131,7 @@ def _descargar_todo(lista, base, cb, faltantes):
         pool.shutdown(wait=True, cancel_futures=True)
 
 
-# -------------------------------------------------------------- overrides
+
 def _entradas_overrides(zf, prefijos):
     """{ruta_relativa: ZipInfo}; si un archivo está en varias carpetas, gana la última (client-overrides)."""
     res = {}
@@ -176,7 +176,7 @@ def _guardar_registro(base, origen, archivos, overrides):
         json.dump({"origen": origen, "archivos": archivos, "overrides": overrides}, f, ensure_ascii=False, indent=1)
 
 
-# ------------------------------------------------------------ instalación
+
 def _nombre_libre(nombre, inst):
     nombre = (nombre or "Modpack").strip()[:30] or "Modpack"
     n, candidato = 2, nombre
@@ -241,9 +241,8 @@ def instalar_archivo(ruta, cb):
     raise ErrorPack("No parece un modpack de Modrinth (.mrpack) ni de CurseForge (.zip).")
 
 
-# --------------------------------------------------------------- Modrinth
+
 def versiones(project_id):
-    """Versiones instalables del modpack (las más nuevas primero)."""
     out = []
     for v in mr._get(f"/project/{project_id}/version")[:40]:
         if not any(f.get("filename", "").lower().endswith(".mrpack") for f in v.get("files", [])): continue
@@ -275,7 +274,7 @@ def instalar_desde_modrinth(version_id, cb, nombre=None, ram=None):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-# -------------------------------------------------------------- CurseForge
+
 def instalar_desde_curseforge(proyecto, file_id, cb, nombre=None, ram=None):
     tmp = tempfile.mkdtemp(prefix="dome_pack_")
     try:
@@ -293,7 +292,7 @@ def versiones_de(fuente, proyecto):
     raise ErrorPack("Fuente no válida.")
 
 
-# ----------------------------------------------------------- actualización
+
 def _origen(nombre):
     d = nu.leer(nu.RUTA_INST, {}).get(nombre)
     if not d: raise ErrorPack("Instancia no encontrada.")
@@ -304,7 +303,6 @@ def _origen(nombre):
 
 
 def comprobar_actualizacion(nombre):
-    """Versiones del modpack más nuevas que la instalada: {actual, mc_actual, nuevas[], sugerida}."""
     d, o = _origen(nombre)
     vs = versiones_de(o["fuente"], o["proyecto"])
     ids = [v["id"] for v in vs]
@@ -325,7 +323,7 @@ def _paquete_origen(o, version_id, tmp):
 
 
 def actualizar(nombre, version_id, cb):
-    """Actualiza la instancia a otra versión de su modpack sin tocar mundos ni tus cambios."""
+    
     d, o = _origen(nombre)
     if not d.get("carpeta"): raise ErrorPack("Esta instancia no tiene carpeta propia; no se puede actualizar.")
     base = nu.carpeta_juego(d)

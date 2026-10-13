@@ -1,4 +1,3 @@
-"""Dome Launcher 2 — backend en Python + interfaz web (pywebview)."""
 import os, sys, json, time, threading, subprocess
 import webview
 import nucleo as nu
@@ -15,13 +14,19 @@ import rendimiento as rd
 import skins as sk
 import webbrowser
 
+if getattr(sys, 'frozen', False):
+    os.chdir(os.path.dirname(os.path.abspath(sys.executable)))
+else:
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 def recurso_path(relativa):
-    """Obtiene la ruta absoluta correcta tanto en desarrollo como dentro del .exe de PyInstaller."""
-    try:
-        base = sys._MEIPASS
-    except Exception:
-        base = os.path.abspath(os.path.dirname(__file__))
+    """Ruta de un recurso empaquetado (web/, logo.ico...). En un .exe de un solo archivo PyInstaller
+    los extrae a una carpeta temporal (sys._MEIPASS), no junto al .exe."""
+    if getattr(sys, 'frozen', False):
+        base = getattr(sys, '_MEIPASS', None) or os.path.dirname(os.path.abspath(sys.executable))
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base, relativa)
 
 
@@ -33,7 +38,7 @@ class Api:
         self.premium = False        # True: jugar con la cuenta de Microsoft guardada; False: sin conexión
         self.login_activo = False
 
-    # ---- datos ----
+
     def estado(self):
         inst = nu.leer(nu.RUTA_INST, {})
         cambio = False
@@ -43,12 +48,12 @@ class Api:
         cfg = {k: v for k, v in nu.leer(nu.RUTA_CFG, {}).items() if k != "curseforge_key"}    # la clave de API no sale del backend
         return {"instancias": [{"nombre": n, "mods": nu.contar_mods(d), **d, "logo_uri": lg.uri(d.get("logo"))} for n, d in inst.items()], "config": cfg}
 
-    # ---- cuenta premium (Microsoft) ----
+
     def cuenta_estado(self):
         return cu.estado()
 
     def cuenta_modo(self, premium):
-        """La interfaz avisa si se juega con la cuenta premium o sin conexión."""
+       
         self.premium = bool(premium) and cu.estado()["cuenta"] is not None
         return {"premium": self.premium}
 
@@ -87,7 +92,6 @@ class Api:
         cu.cerrar_sesion(); self.premium = False
         return cu.estado()
 
-    # ---- skin y capa (cuenta premium) ----
     def _cosm(self, fn, *a):
         try: return {"ok": True, "datos": fn(*a)}
         except cu.ErrorCuenta as e:
@@ -110,9 +114,9 @@ class Api:
         if not self.premium: return {"ok": False, "error": "Inicia sesión con Microsoft para cambiar tu capa."}
         return self._cosm(cu.activar_capa, id_capa)
 
-    # ---- biblioteca de skins (estilo launcher oficial) ----
+    
     def _skin_op(self, fn, *a):
-        """Como _cosm, pero también entiende los errores de la biblioteca."""
+      
         try: return {"ok": True, "datos": fn(*a)}
         except (cu.ErrorCuenta, sk.ErrorSkins) as e:
             if getattr(e, "caducada", False): self.premium = False; self._js("onCuentaCerrada", cu.estado())
@@ -129,7 +133,7 @@ class Api:
         return self._skin_op(self._skins_todo)
 
     def skin_nueva_elegir(self):
-        """Abre el selector de archivo y deja la skin elegida pendiente hasta que la interfaz confirme nombre y modelo."""
+      
         if not self.premium: return {"ok": False, "error": "Inicia sesión con Microsoft para cambiar tu skin."}
         tipo = webview.FileDialog.OPEN if hasattr(webview, "FileDialog") else webview.OPEN_DIALOG
         rutas = self._win.create_file_dialog(tipo, allow_multiple=False, file_types=("Skin PNG (*.png)",))
@@ -156,7 +160,7 @@ class Api:
     def skin_renombrar(self, sid, nombre): return self._skin_op(lambda: {"lib": sk.renombrar(sid, nombre)})
     def skin_borrar(self, sid): return self._skin_op(lambda: {"lib": sk.borrar(sid)})
 
-    # ---- rendimiento: RAM, descargas en paralelo, JVM optimizada, GPU ----
+
     def rendimiento_estado(self):
         return {"cfg": rd.leer(), "ram_total": rd.ram_total_gb(), "hilos_max": rd.HILOS_MAX,
                 "gpu_auto": os.name == "nt" or sys.platform.startswith("linux")}
@@ -174,7 +178,7 @@ class Api:
         nu.guardar_inst(inst)
         return {"ok": True, "ram": inst[nombre]["ram"]}
 
-    # ---- apariencia: modo, colores y fondo ----
+
     def tema_obtener(self):
         return {"tema": tm.leer_tema(), "animaciones": nu.leer(nu.RUTA_CFG, {}).get("animaciones", True) is not False}
 
@@ -202,7 +206,7 @@ class Api:
         except Exception as e:
             return {"ok": False, "error": f"Error inesperado: {e}"}
 
-    # ---- noticias oficiales de Minecraft ----
+
     def novedades(self):
         try: return {"ok": True, "datos": nv.lista()}
         except nv.ErrorNoticias as e: return {"ok": False, "error": str(e)}
@@ -217,7 +221,7 @@ class Api:
         """Abre en el navegador solo enlaces https de los sitios oficiales de Minecraft/Mojang y de CurseForge."""
         if nv.url_enlace_valida(url) or cf.url_web_valida(url): webbrowser.open(url)
 
-    # ---- iconos de instancia ----
+  
     def iconos_listar(self): return {"ok": True, "datos": ic.listar()}
 
     def icono_anadir(self):
@@ -263,7 +267,7 @@ class Api:
         finally:
             self._logos_activo = False
 
-    # ---- ventana sin marco ----
+
     def minimizar(self): self._win.minimize()
     def maximizar(self):
         """Alterna maximizada/restaurada y devuelve el estado nuevo."""
@@ -279,7 +283,6 @@ class Api:
         d = nu.leer(nu.RUTA_INST, {}).get(nombre)
         if d: nu.abrir_carpeta(os.path.join(nu.preparar_carpeta(d), sub))
 
-    # ---- mods de una instancia ----
     def mods(self, nombre):
         d = nu.leer(nu.RUTA_INST, {}).get(nombre)
         if not d: return {"error": "Instancia no encontrada"}
@@ -307,7 +310,7 @@ class Api:
         rutas = self._win.create_file_dialog(tipo, allow_multiple=True, file_types=("Mods de Minecraft (*.jar)",))
         return self.mod_anadir_rutas(nombre, list(rutas or []))
 
-    # ---- Modrinth ----
+   
     def _modrinth(self, nombre, fn, *args):
         d = nu.leer(nu.RUTA_INST, {}).get(nombre)
         if not d: return {"ok": False, "error": "Instancia no encontrada"}
@@ -330,8 +333,7 @@ class Api:
     def modrinth_actualizar(self, nombre, archivo, version_id):
         return self._modrinth(nombre, mr.actualizar, archivo, version_id)
 
-    # ---- Modpacks (.mrpack) ----
-    # ---- Centro de contenido (modpacks, mods, resource packs, data packs, shaders) ----
+    
     def _simple(self, fn, *args):
         try: return {"ok": True, "datos": fn(*args)}
         except mr.ErrorModrinth as e: return {"ok": False, "error": str(e)}
@@ -366,7 +368,7 @@ class Api:
         if not rutas: return {"ok": False, "cancelado": True}
         return self._iniciar_pack(lambda cb: mp.instalar_archivo(rutas[0], cb))
 
-    # ---- actualizar un modpack ya instalado ----
+    
     def modpack_actualizacion(self, nombre): return self._simple(mp.comprobar_actualizacion, nombre)
 
     def modpack_actualizar(self, nombre, version_id):
@@ -396,7 +398,7 @@ class Api:
         finally:
             self.instalando_pack = False
 
-    # ---- lanzar Minecraft ----
+
     def jugar(self, nombre, usuario):
         if self.jugando: return
         datos = nu.leer(nu.RUTA_INST, {}).get(nombre)
@@ -435,7 +437,7 @@ class Api:
             self.jugando = False
             self._js("onEstadoJuego", False)
 
-    # ---- versiones disponibles ----
+   
     def versiones(self, tipo="Vanilla"):
         try:
             return nu.versiones(tipo)
@@ -443,7 +445,7 @@ class Api:
             self._js("onLog", f"❌ No se pudo obtener la lista de versiones: {e}")
             return []
 
-    # ---- crear instancia (descarga + registro) ----
+
     def crear(self, d):
         nombre = d["nombre"].strip()
         if not nombre or nombre in nu.leer(nu.RUTA_INST, {}):
@@ -479,7 +481,6 @@ class Api:
         nu.eliminar(nombre)
         lg.limpiar(nu.leer(nu.RUTA_INST, {}))
 
-    # ---- crash report ----
     def _ultimo_crash(self, juego):
         carpeta = os.path.join(juego, "crash-reports")
         try:

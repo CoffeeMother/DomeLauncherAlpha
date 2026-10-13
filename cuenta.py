@@ -1,12 +1,3 @@
-"""
-Cuenta premium (Microsoft / Minecraft Java) para jugar online.
-
-Flujo: ventana de inicio de sesión de Microsoft (PKCE + state) -> Xbox Live -> XSTS -> Minecraft -> perfil.
-- Solo se guarda el *refresh token* (cuenta.json en la carpeta de datos). El token de acceso del juego se pide
-  de nuevo cada vez que se pulsa Jugar y vive solo en memoria.
-- Ningún token llega a la interfaz: la UI solo recibe el nombre y el UUID.
-- Hace falta un "Client ID" de una aplicación de Azure (ver README de ajustes). Se guarda en la configuración.
-"""
 import os, re, json, uuid as _uuid, threading, urllib.parse
 import requests
 import minecraft_launcher_lib as mll
@@ -38,7 +29,6 @@ class ErrorCuenta(Exception):
         self.caducada = caducada          # True: la sesión guardada ya no sirve y se borró
 
 
-# ------------------------------------------------------------------ configuración
 def client_id():
     c = nu.leer(nu.RUTA_CFG, {})
     v = (c.get("azure_client_id") if isinstance(c, dict) else None) or os.environ.get("DOME_AZURE_CLIENT_ID") or CLIENT_ID_INTEGRADO
@@ -79,11 +69,11 @@ def _uuid_con_guiones(h):
     return str(_uuid.UUID(h))
 
 
-# ------------------------------------------------------------------ inicio de sesión
+
 def iniciar():
     """(url_de_login, state, code_verifier). Lanza ErrorCuenta si falta el Client ID."""
     cid = client_id()
-    if not cid: raise ErrorCuenta("Falta el Client ID de Azure. Pégalo en Ajustes → Cuenta de Microsoft.")
+    if not cid: raise ErrorCuenta("El inicio de sesión con Microsoft no está disponible en esta versión del launcher.")
     return mll.microsoft_account.get_secure_login_data(cid, REDIRECT)
 
 
@@ -113,13 +103,13 @@ def completar(url_final, state, verifier):
     return estado()
 
 
-# ------------------------------------------------------------------ sesión para jugar
+
 def sesion_para_jugar():
     """Renueva la sesión y devuelve {'name','uuid','token'} para lanzar el juego (token solo en memoria)."""
     d = _leer()
     if not d: raise ErrorCuenta("No hay ninguna sesión iniciada.", caducada=True)
     cid = client_id()
-    if not cid: raise ErrorCuenta("Falta el Client ID de Azure (Ajustes → Cuenta de Microsoft).")
+    if not cid: raise ErrorCuenta("El inicio de sesión con Microsoft no está disponible en esta versión del launcher.")
     try:
         tok = _post_token({"client_id": cid, "scope": mll.microsoft_account.__SCOPE__, "refresh_token": d["refresh_token"],
                            "grant_type": "refresh_token"}, mll.microsoft_account.__TOKEN_URL__)
@@ -132,7 +122,7 @@ def sesion_para_jugar():
     return {"name": perfil["name"], "uuid": _uuid_con_guiones(perfil["id"]), "token": perfil["mc_token"]}
 
 
-# ------------------------------------------------------------------ pasos de la cadena de autenticación
+
 def _red(fn, *a, **k):
     try:
         return fn(*a, timeout=TIEMPO, **k)
@@ -187,7 +177,7 @@ def _cadena(ms_token):
     return {"id": perfil["id"].lower(), "name": perfil["name"], "mc_token": mc_tok}
 
 
-# ------------------------------------------------------------------ skin y capa (solo cuentas premium)
+
 import base64, struct, time
 API_MC = "https://api.minecraftservices.com/minecraft/profile"
 MAX_SKIN = 24 * 1024                      # límite de Mojang para una skin

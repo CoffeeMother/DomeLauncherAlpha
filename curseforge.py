@@ -1,20 +1,3 @@
-"""
-Cliente de CurseForge para Dome Launcher: mods, modpacks, resource packs (texturas), data packs y shaders.
-
-- Busca por tipo, versión, cargador y categorías; instala mods con sus dependencias obligatorias.
-- Resource packs, shaders y data packs se descargan como .zip a la carpeta que corresponde de la instancia.
-- Lee modpacks de CurseForge (.zip con manifest.json) para que modpack.py los instale y actualice.
-
-REQUISITO: la API de CurseForge necesita una clave personal y gratuita (console.curseforge.com).
-Se pega en Ajustes y se guarda en launcher_config.json (o en la variable CURSEFORGE_API_KEY).
-
-Respeto a los autores: algunos mods/modpacks desactivan las descargas desde aplicaciones de
-terceros; la API no entrega su URL. En ese caso NO se intenta saltarse el bloqueo: se avisa con el
-enlace de su página para descargarlos a mano.
-
-Seguridad: solo se descarga por https desde *.forgecdn.net, se verifica el SHA-1 que da la API,
-los nombres de archivo se limpian y todos los parámetros que llegan de la interfaz se validan.
-"""
 import os, re, json, hashlib, zipfile, urllib.parse
 import requests
 import nucleo as nu
@@ -43,13 +26,12 @@ class ErrorCurseForge(mr.ErrorModrinth):
     """Hereda de ErrorModrinth para que la interfaz muestre su mensaje igual que los demás."""
 
 
-# ------------------------------------------------------------------ red
-# Clave de API integrada: así el launcher funciona sin configurar nada. Es TU clave personal: si compartes el
-# launcher con otras personas, borra este valor (cada una debe usar la suya) y créala de nuevo en console.curseforge.com.
-CLAVE_INTEGRADA = "$2a$10$okypMOS8uYPev/QkhyMpWeOUOlW3JdsBnqmRSqqC/Fkolm9.MCCXy"
 
 
-CLAVE_ANTERIOR = "cfc_pat_7452396b6e778119c919923c097c19e4084fe33cf75cf14978cace862e8ab9a4"  # la que funcionaba antes; se prueba si las demás son rechazadas
+CLAVE_INTEGRADA = "$2a$10$JmxNCps1.lrSdzZ8SnOoVO7wlSySmYZ16uoP/JERHGw5P5YuiNT8W"
+
+
+CLAVE_ANTERIOR = "cfc_pat_865b94a480cecb2967679bedc7c44611e3b4f6ad2ca5e8d993b65f1c0d3ad57a"  # la que funcionaba antes; se prueba si las demás son rechazadas
 
 
 def _claves():
@@ -67,7 +49,7 @@ _buena = None  # última clave que CurseForge aceptó
 def clave():
     ks = _claves()
     if _buena in ks: return _buena
-    if not ks: raise ErrorCurseForge("Falta la clave de API de CurseForge. Consíguela gratis en console.curseforge.com y pégala en Ajustes → CurseForge.")
+    if not ks: raise ErrorCurseForge("Falta la clave de API de CurseForge. Esta versión del launcher no la incluye.")
     return ks[0]
 
 
@@ -91,7 +73,7 @@ def _api(metodo, ruta, bloqueo_ok=False, **kw):
         _buena = k
         break
     if r.status_code == 403 and bloqueo_ok: return None
-    if r.status_code in (401, 403): raise ErrorCurseForge("CurseForge rechazó la clave de API (error %d). Genera una nueva en console.curseforge.com y pégala en Ajustes → CurseForge." % r.status_code)
+    if r.status_code in (401, 403): raise ErrorCurseForge("CurseForge rechazó la clave de API (error %d). Avisa al creador del launcher." % r.status_code)
     if r.status_code == 404: raise ErrorCurseForge("CurseForge no encontró eso (puede que se haya eliminado).")
     if r.status_code == 429: raise ErrorCurseForge("CurseForge pide esperar un momento (demasiadas consultas).")
     if r.status_code >= 400: raise ErrorCurseForge(f"CurseForge respondió con error {r.status_code}.")
@@ -118,7 +100,7 @@ def _host_cdn_ok(u):
     return p.scheme == "https" and str(p.hostname or "").endswith(".forgecdn.net")
 
 
-# ------------------------------------------------------------- buscar
+
 def _clase(tipo):
     """Id de la sección en CurseForge. Se pregunta a la API (por si cambian) y, si no se puede, se usa el valor conocido."""
     if not _clases_cache:
@@ -184,7 +166,7 @@ def buscar(tipo, texto, pagina=0, orden="downloads", version="", loaders=None, d
     return {"total": int((r.get("pagination") or {}).get("totalCount", len(res))), "pagina": int(pagina), "resultados": res}
 
 
-# ------------------------------------------------------------ archivos
+
 def _tipo_release(f):
     return {1: "release", 2: "beta", 3: "alpha"}.get(f.get("releaseType"), "release")
 
@@ -254,7 +236,7 @@ def _descargar(f, destino, extensiones=(".jar",)):
     return nombre
 
 
-# ---------------------------------------------------------------- mods
+
 def _instalar_mod(d, pid, titulo, ya, res, nivel, loaders, mc):
     clave_id = f"cf:{pid}"
     if clave_id in ya: return
@@ -320,8 +302,7 @@ def instalar_mod(d, project_id, titulo=""):
     return res
 
 
-# ------------------------------------------------------------- modpacks
-def versiones_modpack(project_id):
+
     """Archivos instalables del modpack, los más nuevos primero: [{id, nombre, mc, loaders, tipo}]."""
     pid = _id(project_id)
     fs = [f for f in _archivos(pid, tam=50) if str(f.get("fileName", "")).lower().endswith(".zip")]

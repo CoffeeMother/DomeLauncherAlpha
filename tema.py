@@ -99,7 +99,7 @@ def color_ventana():
     return {"claro": "#f3f1f8", "oled": "#000000"}.get(leer_tema()["modo"], "#0b0a10")
 
 
-# ------------------------------------------------------------------ fondos
+
 def _tipo_imagen(cab):
     if cab.startswith(b"\x89PNG\r\n\x1a\n"): return "png"
     if cab.startswith(b"\xff\xd8\xff"): return "jpg"

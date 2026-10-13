@@ -1,9 +1,4 @@
-"""
-Iconos de instancia: imágenes sueltas dentro de web/iconos/ (bloques, logos, lo que quieras).
 
-Para añadir los tuyos basta con copiar el archivo (PNG, JPG, WEBP o GIF) a esa carpeta, o usar el botón
-«Añadir imagen» del selector. Nada de lo que llega desde la interfaz puede apuntar fuera de la carpeta.
-"""
 import os, re, shutil
 from tema import _tipo_imagen
 

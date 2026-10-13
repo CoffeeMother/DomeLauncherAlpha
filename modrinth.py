@@ -16,7 +16,6 @@ class ErrorModrinth(Exception):
     pass
 
 
-# --------------------------------------------------------------------- red
 def _revisar(r):
     if r.status_code == 429: raise ErrorModrinth("Modrinth pide esperar un momento (demasiadas consultas).")
     if r.status_code >= 400: raise ErrorModrinth(f"Modrinth respondió con error {r.status_code}.")

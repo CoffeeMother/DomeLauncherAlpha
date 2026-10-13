@@ -43,6 +43,7 @@ button,input{font:inherit;color:inherit}
 .acciones{display:flex;gap:12px;margin-top:28px}.acciones .btn{padding:0 34px}
 .lg-sep{display:flex;align-items:center;gap:10px;color:var(--tenue);font-size:12px}.lg-sep::before,.lg-sep::after{content:"";flex:1;height:1px;background:var(--linea)}
 .btn.ms{display:flex;align-items:center;justify-content:center;gap:10px}.btn.ms svg{width:18px;height:18px;flex:none}
+.ms-links{display:flex;gap:16px;flex-wrap:wrap}
 #ms-msg{font-size:12px;color:var(--tenue);line-height:1.5;margin:0}#ms-msg.err{color:var(--err)}
 .link-mini{background:none;border:0;color:var(--tenue);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;align-self:flex-start}.link-mini:hover{color:var(--txt)}
 .btn.sec{background:rgb(var(--fg)/.08);color:var(--txt)}.btn.sec:hover{background:rgb(var(--fg)/.13)}.btn[disabled]{opacity:.6;cursor:wait}
@@ -374,7 +375,7 @@ body.intro #login .card,body.intro #login .card>*{animation:none;opacity:0}
 <section id="login"><div class="card">
   <div class="logo"><img class="logo-img" src="logo.png" alt="Dome Launcher" draggable="false" onerror="this.remove()"><span class="logo-txt">DOME<span>Launcher</span></span></div>
   <button class="btn ms" id="ms-entrar"><svg viewBox="0 0 24 24"><path fill="#f25022" d="M3 3h8.5v8.5H3z"/><path fill="#7fba00" d="M12.5 3H21v8.5h-8.5z"/><path fill="#00a4ef" d="M3 12.5h8.5V21H3z"/><path fill="#ffb900" d="M12.5 12.5H21V21h-8.5z"/></svg><span id="ms-txt">Iniciar sesión con Microsoft</span></button>
-  <button class="link-mini ocu" id="ms-otra">Usar otra cuenta de Microsoft</button>
+  <div class="ms-links"><button class="link-mini ocu" id="ms-otra">Usar otra cuenta</button><button class="link-mini ocu" id="ms-cerrar">Cerrar sesión</button></div>
   <div id="ms-msg"></div>
   <div class="lg-sep">o juega sin conexión</div>
   <input id="nick" maxlength="16" placeholder="Nombre de usuario" autocomplete="off"><button class="btn sec" id="entrar">Jugar sin conexión</button>
@@ -392,7 +393,7 @@ body.intro #login .card,body.intro #login .card>*{animation:none;opacity:0}
     <button data-v="aj" title="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
     <button id="salir" title="Cambiar cuenta"><svg viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/></svg></button>
   </nav>
-  <div class="view hero on" id="v-home"><div class="hero-top"><button class="hico" id="h-ico" title="Cambiar icono"><img alt=""></button><small id="usr"></small></div><h1 id="tit">Sin instancias</h1><div class="meta" id="meta">Crea una instancia para empezar a jugar.</div>
+  <div class="view hero on" id="v-home"><div class="hero-top"><button class="hico" id="h-ico" title="Cambiar icono"><img alt=""></button><small id="usr"></small><button class="link-mini ocu" id="usr-cerrar" title="Borra la sesión guardada en este equipo">Cerrar sesión de Microsoft</button></div><h1 id="tit">Sin instancias</h1><div class="meta" id="meta">Crea una instancia para empezar a jugar.</div>
     <div class="acciones"><button class="btn" id="jugar">Jugar</button><button class="btn sec" id="carp">Carpeta</button><button class="btn sec ocu" id="h-upd" title="Buscar una versión nueva del modpack">Actualizar modpack</button><button class="btn sec" id="elim">Eliminar</button></div>
     <aside class="news" id="news"><div class="news-cab"><h3><svg viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v13a1 1 0 0 0 1 1H7a2 2 0 0 1-2-2z"/><path d="M18 8h2v10a2 2 0 0 1-2 2M8 8h7M8 12h7M8 16h4"/></svg>Novedades de Minecraft</h3><button class="mini sec" id="nw-ref" title="Actualizar">↻</button></div>
       <div class="news-off ocu" id="nw-off">Sin conexión: mostrando las últimas noticias guardadas.</div>
@@ -684,7 +685,7 @@ function pintar(){
   const i=lista[sel];
   $("#tit").textContent=i?i.nombre:"Sin instancias";
   $("#meta").innerHTML=i?`${esc(i.tipo||"Vanilla")} · Minecraft ${esc(i.version_target||i.version_id)} · <a class="meta-ram" id="meta-ram" title="Cambiar la RAM de esta instancia">${esc(String(i.ram||4))} GB de RAM</a> · ${+i.mods||0} mods`:"Crea una instancia para empezar a jugar.";
-  $("#usr").textContent="Sesión de "+usuario+(premium?" · premium":" · sin conexión");
+  $("#usr").textContent="Sesión de "+usuario+(premium?" · premium":" · sin conexión");$("#usr-cerrar").classList.toggle("ocu",!premium);
   $("#ib-lista").innerHTML=lista.map((x,n)=>`<button class="ib ${n==sel?"on":""}" data-n="${n}" title="${esc(x.nombre)}"><img class="${x.logo_uri?"logo":""}" src="${icoSrc(x)}" alt=""></button>`).join("");
   const on=$("#ib-lista .ib.on");if(on)on.scrollIntoView({block:"nearest"});
   $("#h-ico").style.display=i?"":"none";if(i){const im=$("#h-ico img");im.src=icoSrc(i);im.classList.toggle("logo",!!i.logo_uri)}
@@ -712,9 +713,9 @@ function msMsg(t,err){const m=$("#ms-msg");m.textContent=t||"";m.classList.toggl
 async function pintarLogin(){
   const r=api()?await api().cuenta_estado():{client_configurado:true,cuenta:null};cuentaInfo=r.cuenta;
   $("#ms-txt").textContent=r.cuenta?`Continuar como ${r.cuenta.nombre}`:"Iniciar sesión con Microsoft";
-  $("#ms-otra").classList.toggle("ocu",!r.cuenta);
+  $("#ms-otra").classList.toggle("ocu",!r.cuenta);$("#ms-cerrar").classList.toggle("ocu",!r.cuenta);
   if(!msBusy)msMsg(!r.cuenta&&!r.client_configurado?"El inicio de sesión con Microsoft no está disponible ahora mismo. Puedes jugar sin conexión.":"")}
-function msEspera(on){msBusy=on;$("#ms-entrar").disabled=on;$("#ms-otra").disabled=on;if(on)msMsg("Completa el inicio de sesión en la ventana de Microsoft…")}
+function msEspera(on){msBusy=on;$("#ms-entrar").disabled=on;$("#ms-otra").disabled=on;$("#ms-cerrar").disabled=on;if(on)msMsg("Completa el inicio de sesión en la ventana de Microsoft…")}
 $("#ms-entrar").onclick=async e=>{
   if(msBusy)return;
   if(cuentaInfo)return abrir(cuentaInfo.nombre,true,e.currentTarget);
@@ -722,6 +723,8 @@ $("#ms-entrar").onclick=async e=>{
   msEspera(true);const r=await api().cuenta_login();
   if(!r.ok){msEspera(false);msMsg(r.error,true)}};
 $("#ms-otra").onclick=async()=>{if(msBusy||!api())return;await api().cuenta_cerrar();cuentaInfo=null;await pintarLogin();$("#ms-entrar").click()};
+$("#ms-cerrar").onclick=async()=>{if(msBusy||!api())return;await api().cuenta_cerrar();cuentaInfo=null;await pintarLogin();msMsg("Sesión cerrada. Tu cuenta ya no queda guardada en este equipo.")};
+$("#usr-cerrar").onclick=async()=>{if(!api())return;await api().cuenta_cerrar();premium=false;cuentaInfo=null;$("#salir").click()};
 window.onCuentaLogin=r=>{msEspera(false);
   if(!r.ok){msMsg(r.cancelado?"":r.error,!r.cancelado);return}
   cuentaInfo=r.estado.cuenta;msMsg("");pintarLogin();abrir(cuentaInfo.nombre,true,$("#ms-entrar"))};

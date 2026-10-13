@@ -29,7 +29,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,          # <--- Modificado a False (Evita los falsos positivos del antivirus)
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
@@ -38,5 +38,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['logo.ico'],
+    icon='logo.ico',    # <--- Ajustado a string para mayor estabilidad
 )

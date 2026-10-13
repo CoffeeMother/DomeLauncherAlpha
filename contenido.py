@@ -1,12 +1,4 @@
-"""
-Centro de contenido de Dome Launcher: busca e instala en Modrinth modpacks, mods, resource packs,
-data packs y shaders.
 
-- Los modpacks se instalan como instancia nueva (ver modpack.py).
-- Los mods usan modrinth.instalar (con dependencias y verificación de hash).
-- Resource packs, shaders y data packs se descargan como .zip a la carpeta que corresponde de la
-  instancia (resourcepacks/, shaderpacks/ o saves/<mundo>/datapacks/), verificando el SHA-512.
-"""
 import os, re, json
 import nucleo as nu
 import modrinth as mr
@@ -30,7 +22,7 @@ def _validar_fuente(fuente, tipo):
     if fuente not in FUENTES: raise mr.ErrorModrinth("Fuente no válida.")
 
 
-# ------------------------------------------------------------ filtros
+
 def versiones_juego():
     """Versiones release de Minecraft para el filtro (las más nuevas primero)."""
     if not _versiones_juego:
