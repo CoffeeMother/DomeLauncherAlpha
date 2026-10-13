@@ -1,11 +1,4 @@
-"""
-Tema del launcher: modo (claro / oscuro / OLED / auto), colores, fondo (imagen o GIF) y ajustes.
 
-Todo se guarda en launcher_config.json bajo la clave "tema" (el resto de la configuración no se toca).
-Los fondos elegidos se copian a <datos>/fondos/ con un nombre propio (hash del contenido), así que
-seguir funcionando aunque muevas o borres el archivo original, y nada de lo que llega desde la
-interfaz puede apuntar fuera de esa carpeta.
-"""
 import os, re, json, base64, hashlib, threading
 import nucleo as nu
 
