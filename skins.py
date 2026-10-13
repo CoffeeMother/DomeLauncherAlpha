@@ -1,11 +1,4 @@
-"""
-Biblioteca de skins (como la del launcher oficial): guardas tus skins con nombre y las aplicas con un clic.
 
-- Cada skin se guarda como PNG con nombre propio (hash del contenido) en <datos>/skins/ y el índice en skins.json.
-- Solo se aceptan PNG de 64x64 o 64x32 y hasta 24 KB (el mismo límite de Mojang).
-- Nada de lo que llega desde la interfaz puede apuntar fuera de esa carpeta: se trabaja con ids, no con rutas.
-- Aplicar una skin la sube a tu cuenta con cuenta.cambiar_skin (solo cuentas premium).
-"""
 import os, re, json, base64, hashlib, threading
 import nucleo as nu
 import cuenta as cu
