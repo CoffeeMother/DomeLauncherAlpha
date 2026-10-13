@@ -1,10 +1,4 @@
-"""
-Logos de modpacks: al instalar un modpack (Modrinth o CurseForge) se baja su logo y se usa como icono de la instancia.
 
-- Solo se descarga por https desde cdn.modrinth.com y *.forgecdn.net, hasta 1 MB, y se comprueba el contenido
-  (PNG, JPG, WEBP o GIF) antes de guardarlo con un nombre propio (hash) en <datos>/logos/.
-- Si algo falla (sin internet, el proyecto no tiene logo...) la instalación sigue y se usa el icono normal.
-"""
 import os, re, base64, hashlib, urllib.parse
 import requests
 import nucleo as nu
