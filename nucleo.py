@@ -1,16 +1,4 @@
-"""
-Núcleo de Dome Launcher 2 (sin interfaz): instancias, instalación de Vanilla/Forge y lanzamiento.
 
-Estructura en disco (igual que Prism / Modrinth App):
-
-  .domeLauncher/
-    assets/ libraries/ versions/ runtime/     <- compartido entre todas las instancias
-    instancias/<carpeta>/                     <- UNA carpeta de juego por instancia
-        mods/  config/  saves/  resourcepacks/  logs/  crash-reports/ ...
-
-Las instancias viejas (sin campo "carpeta") siguen usando .domeLauncher como carpeta de juego,
-así no se pierde ningún mundo ni configuración.
-"""
 import os, re, json, shutil, subprocess, sys, time, zipfile
 try:
     import tomllib            # Python 3.11+
