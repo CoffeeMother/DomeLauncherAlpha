@@ -28,10 +28,10 @@ class ErrorCurseForge(mr.ErrorModrinth):
 
 
 
-CLAVE_INTEGRADA = "$2a$10$JmxNCps1.lrSdzZ8SnOoVO7wlSySmYZ16uoP/JERHGw5P5YuiNT8W"
+CLAVE_INTEGRADA = ""
 
 
-CLAVE_ANTERIOR = "cfc_pat_865b94a480cecb2967679bedc7c44611e3b4f6ad2ca5e8d993b65f1c0d3ad57a"  # la que funcionaba antes; se prueba si las demás son rechazadas
+CLAVE_ANTERIOR = ""  # la que funcionaba antes; se prueba si las demás son rechazadas
 
 
 def _claves():
