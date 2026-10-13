@@ -1,7 +1,8 @@
 """
-Cliente de CurseForge para Dome Launcher (solo mods y modpacks).
+Cliente de CurseForge para Dome Launcher: mods, modpacks, resource packs (texturas), data packs y shaders.
 
-- Busca mods y modpacks, y instala mods con sus dependencias obligatorias.
+- Busca por tipo, versión, cargador y categorías; instala mods con sus dependencias obligatorias.
+- Resource packs, shaders y data packs se descargan como .zip a la carpeta que corresponde de la instancia.
 - Lee modpacks de CurseForge (.zip con manifest.json) para que modpack.py los instale y actualice.
 
 REQUISITO: la API de CurseForge necesita una clave personal y gratuita (console.curseforge.com).
@@ -22,10 +23,13 @@ import tema as tm
 
 API = "https://api.curseforge.com/v1"
 GAME_ID = 432
-CLASE_MOD, CLASE_MODPACK, CLASE_RESOURCEPACK, CLASE_SHADER, CLASE_MUNDO = 6, 4471, 12, 6552, 17
+CLASE_MOD, CLASE_MODPACK, CLASE_RESOURCEPACK, CLASE_SHADER, CLASE_MUNDO, CLASE_DATAPACK = 6, 4471, 12, 6552, 17, 6945
 LOADER_CF = {"forge": 1, "fabric": 4, "quilt": 5, "neoforge": 6}
 ORDEN_CF = {"relevance": 1, "follows": 2, "updated": 3, "downloads": 6, "newest": 11}
-TIPOS = {"modpack": CLASE_MODPACK, "mod": CLASE_MOD}
+TIPOS = {"modpack": CLASE_MODPACK, "mod": CLASE_MOD, "resourcepack": CLASE_RESOURCEPACK, "shader": CLASE_SHADER, "datapack": CLASE_DATAPACK}
+_SLUG_CLASE = {"mod": "mc-mods", "modpack": "modpacks", "resourcepack": "texture-packs", "shader": "shaders", "datapack": "data-packs"}
+_SLUG_LOADER = {"forge", "fabric", "quilt", "neoforge"}     # ya tienen su propio filtro de cargadores
+_clases_cache, _cats_cache = {}, {}
 MAX_BYTES = 400 * 1024 * 1024
 MAX_BYTES_ZIP = 2 * 1024 ** 3
 _ID = re.compile(r"\d{1,10}")
@@ -42,29 +46,52 @@ class ErrorCurseForge(mr.ErrorModrinth):
 # ------------------------------------------------------------------ red
 # Clave de API integrada: así el launcher funciona sin configurar nada. Es TU clave personal: si compartes el
 # launcher con otras personas, borra este valor (cada una debe usar la suya) y créala de nuevo en console.curseforge.com.
-CLAVE_INTEGRADA = "cfc_pat_7452396b6e778119c919923c097c19e4084fe33cf75cf14978cace862e8ab9a4"
+CLAVE_INTEGRADA = "$2a$10$okypMOS8uYPev/QkhyMpWeOUOlW3JdsBnqmRSqqC/Fkolm9.MCCXy"
+
+
+CLAVE_ANTERIOR = "cfc_pat_7452396b6e778119c919923c097c19e4084fe33cf75cf14978cace862e8ab9a4"  # la que funcionaba antes; se prueba si las demás son rechazadas
+
+
+def _claves():
+    """Claves candidatas en orden: la de Ajustes, la variable CURSEFORGE_API_KEY y la integrada (sin repetir)."""
+    out = []
+    for k in (tm.leer_clave("curseforge_key"), os.environ.get("CURSEFORGE_API_KEY", ""), CLAVE_INTEGRADA, CLAVE_ANTERIOR):
+        k = str(k or "").strip()
+        if k and k not in out: out.append(k)
+    return out
+
+
+_buena = None  # última clave que CurseForge aceptó
 
 
 def clave():
-    """Orden: la guardada en Ajustes, la variable CURSEFORGE_API_KEY y, si no hay, la integrada."""
-    k = str(tm.leer_clave("curseforge_key") or os.environ.get("CURSEFORGE_API_KEY", "") or CLAVE_INTEGRADA).strip()
-    if not k: raise ErrorCurseForge("Falta la clave de API de CurseForge. Consíguela gratis en console.curseforge.com y pégala en Ajustes → CurseForge.")
-    return k
+    ks = _claves()
+    if _buena in ks: return _buena
+    if not ks: raise ErrorCurseForge("Falta la clave de API de CurseForge. Consíguela gratis en console.curseforge.com y pégala en Ajustes → CurseForge.")
+    return ks[0]
 
 
 def hay_clave():
-    try: clave(); return True
-    except ErrorCurseForge: return False
+    return bool(_claves())
 
 
 def _api(metodo, ruta, bloqueo_ok=False, **kw):
-    """Llama a la API. Con bloqueo_ok=True un 403 devuelve None (descarga no permitida por el autor)."""
-    try:
-        r = _s.request(metodo, API + ruta, timeout=20, headers={"x-api-key": clave()}, **kw)
-    except requests.RequestException:
-        raise ErrorCurseForge("No pude conectar con CurseForge (¿sin internet?).")
+    """Llama a la API. Con bloqueo_ok=True un 403 devuelve None (descarga no permitida por el autor).
+    Si una clave es rechazada (401/403) prueba la siguiente (así una clave vieja guardada en Ajustes no tapa a la buena)."""
+    ks = _claves()
+    if not ks: clave()
+    r = None
+    for i, k in enumerate(ks):
+        try:
+            r = _s.request(metodo, API + ruta, timeout=20, headers={"x-api-key": k}, **kw)
+        except requests.RequestException:
+            raise ErrorCurseForge("No pude conectar con CurseForge (¿sin internet?).")
+        if r.status_code == 401 or (r.status_code == 403 and not bloqueo_ok): continue
+        global _buena
+        _buena = k
+        break
     if r.status_code == 403 and bloqueo_ok: return None
-    if r.status_code in (401, 403): raise ErrorCurseForge("CurseForge rechazó la clave de API. Revísala en Ajustes → CurseForge.")
+    if r.status_code in (401, 403): raise ErrorCurseForge("CurseForge rechazó la clave de API (error %d). Genera una nueva en console.curseforge.com y pégala en Ajustes → CurseForge." % r.status_code)
     if r.status_code == 404: raise ErrorCurseForge("CurseForge no encontró eso (puede que se haya eliminado).")
     if r.status_code == 429: raise ErrorCurseForge("CurseForge pide esperar un momento (demasiadas consultas).")
     if r.status_code >= 400: raise ErrorCurseForge(f"CurseForge respondió con error {r.status_code}.")
@@ -92,15 +119,54 @@ def _host_cdn_ok(u):
 
 
 # ------------------------------------------------------------- buscar
-def buscar(tipo, texto, pagina=0, orden="downloads", version="", loaders=None, d=None):
-    """Busca mods o modpacks. CurseForge filtra por UN loader y solo si se indica la versión del juego."""
-    if tipo not in TIPOS: raise ErrorCurseForge("CurseForge solo ofrece mods y modpacks en este launcher.")
-    p = {"gameId": GAME_ID, "classId": TIPOS[tipo], "searchFilter": str(texto or "")[:100], "sortOrder": "desc",
+def _clase(tipo):
+    """Id de la sección en CurseForge. Se pregunta a la API (por si cambian) y, si no se puede, se usa el valor conocido."""
+    if not _clases_cache:
+        try:
+            for c in _api("GET", "/categories", params={"gameId": GAME_ID, "classesOnly": "true"}).get("data") or []:
+                if isinstance(c, dict) and c.get("slug") and isinstance(c.get("id"), int): _clases_cache[c["slug"]] = c["id"]
+        except ErrorCurseForge:
+            pass
+    cid = _clases_cache.get(_SLUG_CLASE.get(tipo))
+    return cid if isinstance(cid, int) else TIPOS[tipo]
+
+
+def categorias(tipo):
+    """Categorías de esa sección: [{id: slug, nombre}] (las de primer nivel, sin las de cargadores)."""
+    if tipo not in TIPOS: raise ErrorCurseForge("Tipo de contenido no válido.")
+    if tipo not in _cats_cache:
+        cid = _clase(tipo)
+        datos = _api("GET", "/categories", params={"gameId": GAME_ID, "classId": cid}).get("data") or []
+        res = []
+        for c in sorted((x for x in datos if isinstance(x, dict)), key=lambda x: (x.get("displayIndex") or 0, str(x.get("name", "")))):
+            slug = str(c.get("slug", ""))
+            if c.get("isClass") or c.get("parentCategoryId") != cid or slug in _SLUG_LOADER: continue
+            if isinstance(c.get("id"), int) and re.fullmatch(r"[a-z0-9\-]{1,40}", slug):
+                res.append({"slug": slug, "nombre": str(c.get("name") or slug)[:40], "n": c["id"]})
+        _cats_cache[tipo] = res
+    return [{"id": c["slug"], "nombre": c["nombre"]} for c in _cats_cache[tipo]]
+
+
+def _ids_categoria(tipo, slugs):
+    """De los slugs que manda la interfaz a los ids numéricos de CurseForge (los desconocidos se ignoran)."""
+    if not slugs: return []
+    categorias(tipo)
+    mapa = {c["slug"]: c["n"] for c in _cats_cache.get(tipo, [])}
+    return [mapa[x] for x in dict.fromkeys(slugs) if isinstance(x, str) and x in mapa][:10]
+
+
+def buscar(tipo, texto, pagina=0, orden="downloads", version="", loaders=None, d=None, cats=None):
+    """Busca contenido. CurseForge filtra por UN loader y solo si se indica la versión del juego."""
+    if tipo not in TIPOS: raise ErrorCurseForge("Tipo de contenido no válido.")
+    p = {"gameId": GAME_ID, "classId": _clase(tipo), "searchFilter": str(texto or "")[:100], "sortOrder": "desc",
          "sortField": ORDEN_CF.get(orden, 6), "pageSize": 20, "index": min(max(0, int(pagina)) * 20, 9980)}
     if version and re.fullmatch(r"[\w.\-]{1,20}", str(version)):
         p["gameVersion"] = version
         ls = [l for l in (loaders or []) if l in LOADER_CF] if tipo in ("mod", "modpack") else []
         if ls: p["modLoaderType"] = LOADER_CF[ls[0]]
+    ids = _ids_categoria(tipo, cats)
+    if len(ids) == 1: p["categoryId"] = ids[0]
+    elif ids: p["categoryIds"] = json.dumps(ids)
     r = _api("GET", "/mods/search", params=p)
     ya = set()
     if tipo == "mod" and d:
@@ -222,6 +288,25 @@ def _instalar_mod(d, pid, titulo, ya, res, nivel, loaders, mc):
                     "titulo": titulo, "fuente": "curseforge"}
     mr._guardar_manifiesto(d, man)
     (res["instalados"] if nivel == 0 else res["dependencias"]).append(titulo)
+
+
+def instalar_zip(destino, project_id, mc, titulo=""):
+    """Resource pack, shader o data pack: baja el .zip estable más reciente para esa versión de Minecraft."""
+    pid = _id(project_id)
+    res = {"instalados": [], "dependencias": [], "omitidos": [], "sin_version": []}
+    f = _mejor_archivo([x for x in _archivos(pid, mc) if str(x.get("fileName", "")).lower().endswith(".zip")])
+    if f is None: raise ErrorCurseForge(f"No hay una versión compatible con Minecraft {mc} en CurseForge.")
+    nombre = _limpiar_nombre(f["fileName"], (".zip",))
+    if os.path.exists(os.path.join(destino, nombre)):
+        res["omitidos"].append(titulo or nombre); return res
+    try:
+        archivo = _descargar(f, destino, (".zip",))
+    except ErrorCurseForge as e:
+        if str(e) != "DESCARGA_BLOQUEADA": raise
+        web = _web_de(_info_mod(pid), f["id"])
+        raise ErrorCurseForge(f"El autor de «{titulo or nombre}» no permite descargarlo desde otras aplicaciones." + (f" Descárgalo en {web} y copia el .zip a la carpeta correspondiente." if web else ""))
+    res["instalados"].append(titulo or archivo)
+    return res
 
 
 def instalar_mod(d, project_id, titulo=""):

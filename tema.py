@@ -13,7 +13,8 @@ CARPETA_FONDOS = os.path.join(nu.BASE, "fondos")
 MAX_BYTES = 25 * 1024 * 1024
 MODOS = ("auto", "claro", "oscuro", "oled")
 TIPOS_FONDO = ("default", "none", "custom")
-CLAVES_CONFIG = {"animaciones": bool, "curseforge_key": str}   # ajustes simples que la interfaz puede guardar
+CLAVES_CONFIG = {"animaciones": bool, "curseforge_key": str, "azure_client_id": str}   # ajustes simples que la interfaz puede guardar
+_GUID = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 _CLAVE_CF = re.compile(r"[A-Za-z0-9$./_\-]{20,200}")
 _NOMBRE = re.compile(r"fondo_[0-9a-f]{16}\.(png|jpg|gif|webp)")
 _HEX = re.compile(r"#[0-9a-fA-F]{6}")
@@ -85,9 +86,12 @@ def guardar_clave(clave, valor):
     if clave == "curseforge_key":
         valor = valor.strip()
         if valor and not _CLAVE_CF.fullmatch(valor): raise ErrorTema("La clave de CurseForge no tiene un formato válido (copia solo la clave).")
+    if clave == "azure_client_id":
+        valor = valor.strip()
+        if valor and not _GUID.fullmatch(valor): raise ErrorTema("El Client ID debe verse así: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.")
     with _lock:
         cfg = _cfg()
-        if clave == "curseforge_key" and not valor: cfg.pop(clave, None)     # vacío = quitar la clave
+        if clave in ("curseforge_key", "azure_client_id") and not valor: cfg.pop(clave, None)     # vacío = quitar la clave
         else: cfg[clave] = valor
         _escribir_cfg(cfg)
 

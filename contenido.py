@@ -28,8 +28,6 @@ def _validar_tipo(tipo):
 
 def _validar_fuente(fuente, tipo):
     if fuente not in FUENTES: raise mr.ErrorModrinth("Fuente no válida.")
-    if fuente == "curseforge" and tipo not in ("modpack", "mod"):
-        raise mr.ErrorModrinth("CurseForge solo ofrece mods y modpacks en este launcher.")
 
 
 # ------------------------------------------------------------ filtros
@@ -42,9 +40,9 @@ def versiones_juego():
 
 
 def categorias(tipo, fuente="modrinth"):
-    """Categorías que Modrinth ofrece para ese tipo de contenido (CurseForge: sin filtro de categorías)."""
+    """Categorías de ese tipo de contenido. Modrinth: lista de nombres; CurseForge: lista de {id, nombre}."""
     _validar_tipo(tipo)
-    if fuente == "curseforge": return []
+    if fuente == "curseforge": return cf.categorias(tipo)
     if tipo not in _cache_categorias:
         # Los data packs comparten categorías con los mods
         tipos_api = {"datapack": {"datapack", "mod"}}.get(tipo, {tipo})
@@ -70,7 +68,8 @@ def buscar(tipo, texto, pagina=0, orden="downloads", version="", loaders=None, c
     """Busca contenido. Filtros: versión de Minecraft, loaders (cualquiera) y categorías (todas)."""
     _validar_tipo(tipo); _validar_fuente(fuente, tipo)
     if fuente == "curseforge":
-        return cf.buscar(tipo, texto, pagina, orden, version, loaders, d)
+        return cf.buscar(tipo, texto, pagina, orden, version, loaders, d,
+                         [c for c in (categorias or []) if isinstance(c, str) and re.fullmatch(r"[a-z0-9\-]{1,40}", c)])
     if orden not in ORDENES: orden = "downloads"
     if tipo == "datapack":   # en Modrinth los data packs llevan la categoría/loader 'datapack'
         facets = [["project_type:mod", "project_type:datapack"], ["categories:datapack"]]
@@ -112,11 +111,8 @@ def _archivo_zip(v):
 def instalar(d, tipo, project_id, titulo="", mundo="", fuente="modrinth"):
     """Instala contenido en la instancia d. Devuelve {instalados, dependencias, omitidos, sin_version}."""
     _validar_tipo(tipo); _validar_fuente(fuente, tipo)
-    if fuente == "curseforge":
-        if tipo != "mod": raise mr.ErrorModrinth("Los modpacks se instalan como instancia nueva.")
-        return cf.instalar_mod(d, project_id, titulo)
     if tipo == "modpack": raise mr.ErrorModrinth("Los modpacks se instalan como instancia nueva.")
-    if tipo == "mod": return mr.instalar(d, project_id, titulo)
+    if tipo == "mod": return cf.instalar_mod(d, project_id, titulo) if fuente == "curseforge" else mr.instalar(d, project_id, titulo)
     res = {"instalados": [], "dependencias": [], "omitidos": [], "sin_version": []}
     base = nu.preparar_carpeta(d)
     if tipo == "datapack":
@@ -129,6 +125,7 @@ def instalar(d, tipo, project_id, titulo="", mundo="", fuente="modrinth"):
     else:
         destino = os.path.join(base, "resourcepacks" if tipo == "resourcepack" else "shaderpacks")
     mc = d.get("version_target") or d.get("version_id")
+    if fuente == "curseforge": return cf.instalar_zip(destino, project_id, mc, titulo)
     v = _mejor_version(project_id, mc)
     if v is None: raise mr.ErrorModrinth(f"No hay una versión compatible con Minecraft {mc}.")
     f = _archivo_zip(v)

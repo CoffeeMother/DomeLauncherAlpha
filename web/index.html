@@ -4,7 +4,7 @@
 --bg:#0b0a10;--panel:#14121c;--in:var(--in);--bg-rgb:11 10 16;--panel-rgb:20 18 28;--in-rgb:13 12 20;--fg:255 255 255;
 --linea:#2a2638;--txt:#f1eefb;--tenue:#9a94b3;--ac:#8b5cf6;--ac2:#a78bfa;--ac-rgb:139 92 246;--on-ac:#fff;
 --grad:linear-gradient(135deg,#8b5cf6,#a78bfa);--err:var(--err);--warn:var(--warn);--vel:1;--blur:0px;color-scheme:dark;accent-color:var(--ac);
---ease:cubic-bezier(.2,.8,.2,1);--vx:50%;--vy:50%;font-family:"Bahnschrift","Segoe UI Variable Display","Segoe UI",sans-serif}
+--ease:cubic-bezier(.2,.8,.2,1);--vx:50%;--vy:50%;font-family:"Bahnschrift","Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"SF Pro Display","Helvetica Neue","Ubuntu","Cantarell","Noto Sans","DejaVu Sans",sans-serif}
 *{box-sizing:border-box;margin:0}html,body{height:100%;background:var(--bg);color:var(--txt);overflow:hidden;user-select:none}
 button,input{font:inherit;color:inherit}
 .bg{position:absolute;inset:0;overflow:hidden;background:var(--bg)}
@@ -32,7 +32,7 @@ button,input{font:inherit;color:inherit}
 @keyframes sube{from{opacity:0;transform:translateY(14px)}}
 /* ---- app ---- */
 #app{position:absolute;inset:0;display:none}
-.side{position:absolute;left:0;top:0;bottom:0;width:64px;background:rgb(var(--in-rgb)/.80);backdrop-filter:blur(14px);border-right:1px solid var(--linea);display:flex;flex-direction:column;align-items:center;padding:52px 0 18px;gap:10px;z-index:5}
+.side{position:absolute;left:0;top:0;bottom:0;width:64px;background:rgb(var(--in-rgb)/.80);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-right:1px solid var(--linea);display:flex;flex-direction:column;align-items:center;padding:52px 0 18px;gap:10px;z-index:5}
 .side button{position:relative;width:42px;height:42px;border-radius:12px;border:0;background:none;color:var(--tenue);cursor:pointer;transition:color .2s,background .2s}
 .side button:hover{background:rgb(var(--fg)/.07);color:var(--txt)}.side button.on{color:var(--txt);background:rgb(var(--ac-rgb)/.19)}
 .side button.on::before{content:"";position:absolute;left:-11px;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--ac)}
@@ -41,6 +41,10 @@ button,input{font:inherit;color:inherit}
 .hero small{color:var(--tenue);font-size:14px}.hero h1{font-size:clamp(48px,8vw,92px);line-height:.95;font-weight:700;letter-spacing:-2px;margin:10px 0 14px;view-transition-name:titulo}
 .hero .meta{color:var(--tenue);max-width:430px;line-height:1.5;font-size:14px}
 .acciones{display:flex;gap:12px;margin-top:28px}.acciones .btn{padding:0 34px}
+.lg-sep{display:flex;align-items:center;gap:10px;color:var(--tenue);font-size:12px}.lg-sep::before,.lg-sep::after{content:"";flex:1;height:1px;background:var(--linea)}
+.btn.ms{display:flex;align-items:center;justify-content:center;gap:10px}.btn.ms svg{width:18px;height:18px;flex:none}
+#ms-msg{font-size:12px;color:var(--tenue);line-height:1.5;margin:0}#ms-msg.err{color:var(--err)}
+.link-mini{background:none;border:0;color:var(--tenue);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;align-self:flex-start}.link-mini:hover{color:var(--txt)}
 .btn.sec{background:rgb(var(--fg)/.08);color:var(--txt)}.btn.sec:hover{background:rgb(var(--fg)/.13)}.btn[disabled]{opacity:.6;cursor:wait}
 .chips{position:absolute;left:64px;right:0;bottom:0;padding:0 64px 26px;display:flex;gap:10px;flex-wrap:wrap}
 .chip{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--linea);background:rgb(var(--panel-rgb)/.85);cursor:pointer;transition:border-color .2s,background .2s}
@@ -76,6 +80,10 @@ body.arrastrando::after{content:"Suelta aquí los .jar para añadirlos";position
 .mtabs{display:flex;align-items:center;gap:6px;margin-bottom:12px}
 .mtabs>button[data-t]{border:0;background:rgb(var(--fg)/.05);color:var(--tenue);padding:8px 16px;border-radius:10px;cursor:pointer;font-weight:600}
 .mtabs>button[data-t].on{background:rgb(var(--ac-rgb)/.20);color:var(--txt)}
+.ram-in{height:38px;border-radius:10px;border:1px solid var(--linea);background:var(--in);padding:0 12px;outline:0;color:var(--txt);width:100%;user-select:text}.ram-in:focus{border-color:var(--ac)}
+.ram-hint{display:block;margin-top:4px;color:var(--tenue);font-size:11.5px}
+.ram-cuerpo{display:flex;flex-direction:column;gap:12px;padding:4px 2px 2px}.ram-fila{display:flex;align-items:center;gap:10px}.ram-fila .ram-in{max-width:140px}
+.meta-ram{color:inherit;text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}.meta-ram:hover{color:var(--ac)}
 .mini{height:32px;padding:0 14px;border-radius:8px;border:0;background:var(--grad);color:var(--on-ac);font-weight:600;cursor:pointer;white-space:nowrap;transition:filter .15s}.mini:not(.sec):not(:disabled):hover{filter:brightness(1.12)}
 .mini:disabled{opacity:.55;cursor:default}.mini.sec{background:rgb(var(--fg)/.08);color:var(--txt)}
 .busca{display:flex;gap:8px;margin-bottom:12px}
@@ -129,7 +137,7 @@ body.arrastrando::after{content:"Suelta aquí los .jar para añadirlos";position
 .pk-res.lista{grid-template-columns:1fr}.pk-res.lista .pk-card{flex-direction:row}
 .pk-res.lista .pk-banner{width:170px;height:auto;min-height:104px}.pk-res.lista .pk-card .pk-ico{top:28px;left:61px}
 .pk-res.lista .pk-cuerpo{padding:12px 14px}
-.pk-filtros{width:250px;flex:none;border-left:1px solid var(--linea);background:rgb(var(--in-rgb)/.80);backdrop-filter:blur(14px);padding:54px 18px 20px;overflow:auto}
+.pk-filtros{width:250px;flex:none;border-left:1px solid var(--linea);background:rgb(var(--in-rgb)/.80);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:54px 18px 20px;overflow:auto}
 .pk-filtros h3{font-size:14px;display:flex;align-items:center;gap:8px}.pk-filtros h3 svg{width:16px;height:16px;fill:none;stroke:var(--tenue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .pk-filtros h3 .mini{margin-left:auto;height:26px;font-size:12px;padding:0 10px}
 .pk-filtros h4{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--tenue);margin:20px 0 10px}
@@ -170,11 +178,47 @@ body.arrastrando::after{content:"Suelta aquí los .jar para añadirlos";position
 option{background:var(--panel);color:var(--txt)}
 ::selection{background:rgb(var(--ac-rgb)/.4)}
 
+/* ---- instancias en la barra lateral izquierda ---- */
+.side .sep{flex:none;width:26px;height:1px;background:var(--linea);margin:2px 0}
+.ib-lista{flex:1;min-height:0;width:100%;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;gap:10px;padding:4px 0;scrollbar-width:none}.ib-lista::-webkit-scrollbar{display:none}
+.side .ib{flex:none;padding:4px;border:1px solid transparent;transition:background .2s,transform .2s,border-color .2s}
+.ib img{display:block;width:100%;height:100%;object-fit:contain}.ib img.logo{object-fit:cover;border-radius:8px}
+.side .ib.on::before{display:none}.side .ib:hover{transform:scale(1.07)}.side .ib.on{border-color:rgb(var(--ac-rgb)/.55)}
+.hico img.logo,.ci.logo{object-fit:cover;border-radius:10px}
+/* ---- skin y capa ---- */
+#v-skin{padding-right:40px}#v-skin .aj{max-width:1040px}
+.sk-cols{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.sk-act{align-items:center}.sk-act h3{align-self:flex-start}
+.sk3d{position:relative;width:100%;height:340px;perspective:1000px;-webkit-perspective:1000px;cursor:grab;touch-action:none;overflow:hidden;border-radius:12px;background:radial-gradient(ellipse at 50% 88%,rgb(var(--ac-rgb)/.18),transparent 65%),rgb(var(--in-rgb)/.55)}
+.sk3d.arr{cursor:grabbing}
+.sk3-fig{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transform:rotateX(-8deg) rotateY(var(--ry,-30deg))}
+.sk3-fig.gira{transition:transform .6s var(--ease)}
+.sk3-p{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;-webkit-transform-style:preserve-3d}
+.sk3-p canvas{position:absolute;image-rendering:pixelated;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.sk-pista{font-size:11.5px;color:var(--tenue)}
+.sk-lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px}.sk-lib.busy{opacity:.55;pointer-events:none}
+.sk-it{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px 8px;border:2px solid transparent;border-radius:14px;background:rgb(var(--fg)/.05);cursor:pointer;color:var(--txt);transition:background .15s,border-color .2s,transform .15s}
+.sk-it:hover{background:rgb(var(--fg)/.10);transform:translateY(-2px)}.sk-it.on{border-color:var(--ac);background:rgb(var(--ac-rgb)/.12)}
+.sk-it .n{font-size:12.5px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-it canvas{width:60px;height:120px;image-rendering:pixelated}
+.sk-it.nuevo{justify-content:center;border:2px dashed var(--linea);background:none;color:var(--tenue);min-height:170px}.sk-it.nuevo:hover{color:var(--txt);border-color:var(--ac)}
+.sk-it .mas{font-size:34px;line-height:1;width:56px;height:56px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center;font-weight:300}
+.sk-ac{position:absolute;top:4px;right:4px;display:none;gap:4px}.sk-it:hover .sk-ac{display:flex}
+.sk-ac button{width:24px;height:24px;border:0;border-radius:7px;background:rgb(var(--bg-rgb)/.85);color:var(--txt);cursor:pointer;font-size:12px}
+.sk-ac button:hover{background:var(--ac);color:var(--on-ac)}.sk-ac button.del:hover,.sk-ac button.sure{background:#e5484d;color:#fff}
+.capas{display:flex;flex-wrap:wrap;gap:10px}.capa{width:84px;border:2px solid transparent;border-radius:12px;background:rgb(var(--fg)/.05);padding:8px 6px;cursor:pointer;color:var(--txt);font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.capa canvas{width:40px;height:64px;image-rendering:pixelated}.capa:hover{background:rgb(var(--fg)/.10)}.capa.on{border-color:var(--ac)}.capa[disabled]{opacity:.6;cursor:wait}
+.capa .nada{width:40px;height:64px;display:grid;place-items:center;font-size:22px;color:var(--tenue)}
+#sk-modal .m-card{width:520px}.sk-mc{display:flex;gap:20px;padding:4px 20px 20px}
+.sk-mc canvas{width:96px;height:192px;image-rendering:pixelated;background:rgb(var(--in-rgb)/.6);border-radius:12px;flex:none}
+.sk-mf{display:flex;flex-direction:column;gap:12px;flex:1;min-width:0}.sk-mf label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--tenue)}
+#sk-modal.edit .sk-solo-nueva{display:none}
+@media(max-width:1000px){.sk-cols{grid-template-columns:1fr}}
 /* ---- ajustes: apariencia ---- */
 #v-aj{padding-right:40px}
 .aj{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:18px;padding:0 14px 8px 0;max-width:820px}
 .aj h2{font-size:30px;letter-spacing:-.5px}.aj-sub{color:var(--tenue);font-size:14px;margin:4px 0 4px}
-.aj-card{background:rgb(var(--panel-rgb)/.85);border:1px solid var(--linea);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;backdrop-filter:blur(10px)}
+.aj-card{background:rgb(var(--panel-rgb)/.85);border:1px solid var(--linea);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .aj-card h3{font-size:15px}.aj-card h3 small{color:var(--tenue);font-weight:400;font-size:12px;margin-left:8px}
 .modos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .modo{border:2px solid var(--linea);background:none;border-radius:14px;padding:8px 8px 10px;cursor:pointer;display:flex;flex-direction:column;gap:8px;align-items:stretch;text-align:center;font-size:13px;color:var(--txt);transition:border-color .2s,transform .2s,box-shadow .2s}
@@ -218,7 +262,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 .ic-btn{width:54px;height:54px;flex:none;border-radius:12px;border:1px solid var(--linea);background:rgb(var(--in-rgb)/.85);padding:5px;cursor:pointer;align-self:flex-end;transition:border-color .2s,transform .2s}
 .ic-btn:hover{border-color:var(--ac);transform:translateY(-1px)}.ic-btn img{width:100%;height:100%;object-fit:contain;display:block}
 .fila.fn{align-items:flex-end}.fila.fn label{flex:1}
-.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgb(var(--bg-rgb)/.62);backdrop-filter:blur(6px)}
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgb(var(--bg-rgb)/.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .modal.on{display:flex;animation:ent .25s var(--ease)}
 .m-card{background:var(--panel);border:1px solid var(--linea);border-radius:18px;box-shadow:0 24px 70px #0008;display:flex;flex-direction:column;max-height:84vh;animation:sube .35s var(--ease) both}
 .m-cab{display:flex;align-items:center;gap:12px;padding:16px 20px 12px}.m-cab h3{font-size:18px;flex:1}
@@ -231,7 +275,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 .m-pie{padding:8px 20px 16px;font-size:12px;color:var(--tenue);line-height:1.5;min-height:20px}.m-pie.err{color:var(--err)}
 /* ---- noticias de Minecraft ---- */
 #v-home{padding-right:420px}
-.news{position:absolute;right:28px;top:52px;bottom:92px;width:344px;display:flex;flex-direction:column;border:1px solid var(--linea);border-radius:18px;background:rgb(var(--panel-rgb)/.8);backdrop-filter:blur(14px);overflow:hidden}
+.news{position:absolute;right:28px;top:52px;bottom:92px;width:344px;display:flex;flex-direction:column;border:1px solid var(--linea);border-radius:18px;background:rgb(var(--panel-rgb)/.8);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);overflow:hidden}
 .news-cab{display:flex;align-items:center;gap:8px;padding:14px 16px 10px}.news-cab h3{font-size:14px;flex:1;display:flex;align-items:center;gap:8px}
 .news-cab h3 svg{width:16px;height:16px;fill:none;stroke:var(--tenue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .news-cab .mini{height:26px;padding:0 10px;font-size:12px}
@@ -252,7 +296,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 .nw-cuerpo h1,.nw-cuerpo h2{font-size:20px;margin:18px 0 8px}.nw-cuerpo h3{font-size:16px;margin:16px 0 6px}.nw-cuerpo h4{font-size:14px;margin:12px 0 4px;color:var(--ac2)}
 .nw-cuerpo p{margin:8px 0;color:color-mix(in srgb,var(--txt) 88%,var(--bg))}.nw-cuerpo ul,.nw-cuerpo ol{margin:6px 0 6px 22px;display:flex;flex-direction:column;gap:3px}
 .nw-cuerpo li::marker{color:var(--ac)}.nw-cuerpo a{color:var(--ac2);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.nw-cuerpo img{max-width:100%;border-radius:10px;margin:8px 0}.nw-cuerpo code,.nw-cuerpo pre{font-family:Consolas,monospace;background:rgb(var(--fg)/.08);border-radius:6px;padding:1px 6px;font-size:12.5px}
+.nw-cuerpo img{max-width:100%;border-radius:10px;margin:8px 0}.nw-cuerpo code,.nw-cuerpo pre{font-family:Consolas,Menlo,"DejaVu Sans Mono",monospace;background:rgb(var(--fg)/.08);border-radius:6px;padding:1px 6px;font-size:12.5px}
 .nw-cuerpo pre{padding:10px;overflow:auto}.nw-cuerpo hr{border:0;border-top:1px solid var(--linea);margin:16px 0}.nw-cuerpo blockquote{border-left:3px solid var(--ac);padding-left:12px;color:var(--tenue)}
 .nw-cab-t{padding:0 26px 6px;margin-top:-34px;position:relative;z-index:1}.nw-cab-t h2{font-size:24px;letter-spacing:-.4px}.nw-cab-t small{color:var(--tenue)}
 
@@ -266,35 +310,98 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 .fl-lista{display:flex;flex-direction:column;gap:6px;padding:0 20px 6px;overflow:auto}
 .fl-fila{display:flex;align-items:center;gap:10px;background:rgb(var(--fg)/.05);border-radius:10px;padding:8px 12px}.fl-fila b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
 #p-imp{white-space:nowrap}
-</style></head><body>
+
+/* ---- intro animada (estilo Steam Big Picture) ---- */
+#intro{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:var(--bg);overflow:hidden;cursor:pointer;transition:opacity .8s var(--ease),transform .8s var(--ease),filter .8s var(--ease)}
+#intro.fuera{opacity:0;transform:scale(1.12);filter:blur(10px);pointer-events:none}
+.intro-glow{position:absolute;left:50%;top:50%;width:min(900px,120vw);height:min(900px,120vw);margin:calc(min(900px,120vw)/-2) 0 0 calc(min(900px,120vw)/-2);border-radius:50%;
+  background:radial-gradient(circle,rgb(var(--ac-rgb)/.38),rgb(var(--ac-rgb)/.10) 40%,transparent 68%);animation:ig 3s var(--ease) both}
+@keyframes ig{from{opacity:0;transform:scale(.3)}60%{opacity:1}to{opacity:.8;transform:scale(1)}}
+.intro-grid{position:absolute;inset:-50%;background-image:linear-gradient(rgb(var(--fg)/.05) 1px,transparent 1px),linear-gradient(90deg,rgb(var(--fg)/.05) 1px,transparent 1px);background-size:56px 56px;
+  transform:perspective(500px) rotateX(62deg) translateY(0);transform-origin:50% 60%;-webkit-mask-image:radial-gradient(closest-side,#000 10%,transparent 75%);mask-image:radial-gradient(closest-side,#000 10%,transparent 75%);animation:gm 6s linear infinite}
+@keyframes gm{to{background-position:0 56px}}
+.intro-logo{position:relative;display:flex;gap:clamp(2px,.6vw,8px);font-size:clamp(34px,9.5vw,118px);font-weight:800;letter-spacing:-1px;line-height:1;white-space:nowrap}
+.intro-logo .esp{width:.35em}
+.intro-logo .l{display:inline-block;color:var(--txt);animation:letra .9s var(--ease) both;animation-delay:calc(.45s + var(--i)*.085s)}
+.intro-logo .l.b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 22px rgb(var(--ac-rgb)/.55))}
+@keyframes letra{0%{opacity:0;transform:translateY(60px) scale(.55) rotateX(70deg);filter:blur(14px)}60%{opacity:1}100%{opacity:1;transform:none;filter:blur(0)}}
+.intro-logo::after{content:"";position:absolute;inset:-10% 0;background:linear-gradient(100deg,transparent 40%,rgb(255 255 255/.55) 50%,transparent 60%);mix-blend-mode:overlay;transform:translateX(-120%);animation:brillo 1.1s ease-in-out 1.9s both;pointer-events:none}
+@keyframes brillo{to{transform:translateX(120%)}}
+.intro-sub{position:relative;font-size:clamp(11px,1.4vw,16px);letter-spacing:.55em;text-transform:uppercase;color:var(--tenue);animation:sube .8s var(--ease) 1.7s both}
+.intro-carga{position:relative;width:min(340px,64vw);display:flex;flex-direction:column;gap:8px;animation:ent .5s ease .9s both}
+.intro-info{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--tenue);letter-spacing:.04em}
+.intro-info b{color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums}
+.intro-bar{position:relative;height:4px;border-radius:4px;background:rgb(var(--fg)/.10);overflow:hidden}
+.intro-bar i{display:block;height:100%;width:0;background:var(--grad);box-shadow:0 0 12px var(--ac);border-radius:4px}
+.intro-bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgb(255 255 255/.45),transparent);transform:translateX(-100%);animation:corre 1.2s linear infinite}
+@keyframes corre{to{transform:translateX(100%)}}
+.intro-skip{position:absolute;right:22px;bottom:18px;font-size:11px;color:var(--tenue);opacity:.7;animation:ent .6s ease 1.2s both}
+body.intro #login .card,body.intro #login .card>*{animation:none;opacity:0}
+.top{z-index:120!important}
+.logo-img{display:block;width:100%;height:auto;image-rendering:pixelated;user-select:none;filter:drop-shadow(0 0 14px rgb(var(--ac-rgb)/.45)) drop-shadow(0 3px 0 rgb(0 0 0/.3));transition:transform .3s var(--ease)}
+.logo-img:hover{transform:scale(1.03)}
+.logo:has(.logo-img) .logo-txt{display:none}
+.logo:has(.logo-img){margin-bottom:6px}
+.intro-logo.con-img{filter:drop-shadow(0 0 26px rgb(var(--ac-rgb)/.55)) drop-shadow(0 6px 0 rgb(0 0 0/.35))}
+.intro-img{display:block;width:min(780px,84vw);height:auto;image-rendering:pixelated;user-select:none;
+  animation:logoin 1.4s var(--ease) .4s both,flota 3.5s ease-in-out 1.9s infinite alternate}
+@keyframes logoin{from{opacity:0;transform:scale(.55) translateY(40px);clip-path:inset(0 100% 0 0)}50%{opacity:1}to{opacity:1;transform:none;clip-path:inset(0 0 0 0)}}
+@keyframes flota{to{transform:translateY(-8px)}}
+
+/* ---- notificaciones propias (sustituyen a los cuadros nativos del navegador) ---- */
+#notas{position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:130;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:min(540px,92vw)}
+.nota{pointer-events:auto;display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--linea);box-shadow:0 12px 40px #0007;animation:notaIn .28s cubic-bezier(.2,.8,.2,1) both}
+.nota.sale{animation:notaOut .22s ease both}
+.nota .n-ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:15px;font-weight:700;background:rgb(var(--fg)/.08)}
+.nota.ok .n-ico{background:rgb(52 211 153/.16);color:#34d399}
+.nota.error .n-ico,.nota.peligro .n-ico{background:rgb(229 72 77/.18);color:var(--err,#f87171)}
+.nota .n-t{flex:1;min-width:0;font-size:13.5px;line-height:1.4;overflow-wrap:anywhere}
+.nota .n-t b{display:block;font-size:14px}.nota .n-t span{color:var(--tenue);font-size:12.5px}
+.nota .n-b{display:flex;gap:8px;flex:none}
+.nota .mini{font-size:12.5px}.nota .mini.peligro{background:var(--err,#e5484d);color:#fff}
+@keyframes notaIn{from{opacity:0;transform:translateY(-14px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes notaOut{to{opacity:0;transform:translateY(-10px) scale(.98)}}
+@media (prefers-reduced-motion:reduce){.nota,.nota.sale{animation:none}}
+</style></head><body class="intro">
 <div class="bg"><div class="img" id="bgimg"></div></div>
-<div class="top pywebview-drag-region"><button id="min">—</button><button class="x" id="cer">✕</button></div>
+<div class="top pywebview-drag-region"><button id="min" title="Minimizar">—</button><button id="max" title="Maximizar">☐</button><button class="x" id="cer" title="Cerrar">✕</button></div>
+
+<div id="intro"><div class="intro-grid"></div><div class="intro-glow"></div>
+  <div class="intro-logo" id="intro-logo" aria-label="Dome Launcher"></div>
+  <div class="intro-sub">Minecraft Launcher</div><div class="intro-carga"><div class="intro-info"><span id="intro-est">Iniciando…</span><b id="intro-pct">0%</b></div><div class="intro-bar"><i id="intro-fill"></i></div></div>
+  <div class="intro-skip">Pulsa cualquier tecla para saltar</div></div>
 
 <section id="login"><div class="card">
-  <div class="logo">DOME<span>Launcher</span></div><p>Modo sin conexión. Elige tu nombre de jugador.</p>
-  <input id="nick" maxlength="16" placeholder="Nombre de usuario" autocomplete="off"><button class="btn" id="entrar">Entrar</button>
+  <div class="logo"><img class="logo-img" src="logo.png" alt="Dome Launcher" draggable="false" onerror="this.remove()"><span class="logo-txt">DOME<span>Launcher</span></span></div>
+  <button class="btn ms" id="ms-entrar"><svg viewBox="0 0 24 24"><path fill="#f25022" d="M3 3h8.5v8.5H3z"/><path fill="#7fba00" d="M12.5 3H21v8.5h-8.5z"/><path fill="#00a4ef" d="M3 12.5h8.5V21H3z"/><path fill="#ffb900" d="M12.5 12.5H21V21h-8.5z"/></svg><span id="ms-txt">Iniciar sesión con Microsoft</span></button>
+  <button class="link-mini ocu" id="ms-otra">Usar otra cuenta de Microsoft</button>
+  <div id="ms-msg"></div>
+  <div class="lg-sep">o juega sin conexión</div>
+  <input id="nick" maxlength="16" placeholder="Nombre de usuario" autocomplete="off"><button class="btn sec" id="entrar">Jugar sin conexión</button>
 </div></section>
 
 <section id="app">
   <nav class="side">
     <button class="on" data-v="home" title="Inicio"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></button>
-    <button data-v="crear" title="Crear instancia"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
     <button data-v="packs" title="Centro de contenido"><svg viewBox="0 0 24 24"><path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5"/></svg></button>
+    <button data-v="skin" title="Skin y capa"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></button>
     <button data-v="reg" title="Registro"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg></button>
+    <button data-v="crear" title="Crear instancia"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <div class="sep"></div>
+    <div class="ib-lista" id="ib-lista"></div>
     <button data-v="aj" title="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
-    <div class="sp"></div><button id="salir" title="Cambiar cuenta"><svg viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/></svg></button>
+    <button id="salir" title="Cambiar cuenta"><svg viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/></svg></button>
   </nav>
   <div class="view hero on" id="v-home"><div class="hero-top"><button class="hico" id="h-ico" title="Cambiar icono"><img alt=""></button><small id="usr"></small></div><h1 id="tit">Sin instancias</h1><div class="meta" id="meta">Crea una instancia para empezar a jugar.</div>
     <div class="acciones"><button class="btn" id="jugar">Jugar</button><button class="btn sec" id="carp">Carpeta</button><button class="btn sec ocu" id="h-upd" title="Buscar una versión nueva del modpack">Actualizar modpack</button><button class="btn sec" id="elim">Eliminar</button></div>
     <aside class="news" id="news"><div class="news-cab"><h3><svg viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v13a1 1 0 0 0 1 1H7a2 2 0 0 1-2-2z"/><path d="M18 8h2v10a2 2 0 0 1-2 2M8 8h7M8 12h7M8 16h4"/></svg>Novedades de Minecraft</h3><button class="mini sec" id="nw-ref" title="Actualizar">↻</button></div>
       <div class="news-off ocu" id="nw-off">Sin conexión: mostrando las últimas noticias guardadas.</div>
       <div class="news-lista" id="nw-lista"><div class="news-msg">Cargando noticias…</div></div></aside></div>
-  <div class="chips" id="chips"></div>
   <div class="view col" id="v-crear"><div class="form"><h2>Nueva instancia</h2>
     <div class="fila fn"><button class="ic-btn" id="c-ico" title="Elegir icono" type="button"><img alt=""></button><label>Nombre<input id="c-nom" maxlength="30" placeholder="Mi servidor"></label></div>
     <div class="fila" id="c-tipo"><button class="chip on" data-t="Vanilla">Vanilla</button><button class="chip" data-t="Forge">Forge</button><button class="chip" data-t="NeoForge">NeoForge</button><button class="chip" data-t="Fabric">Fabric</button></div>
     <label>Versión<select id="c-ver"></select></label>
-    <label>Memoria RAM<select id="c-ram"><option>2</option><option selected>4</option><option>6</option><option>8</option></select></label>
+    <label>Memoria RAM (GB)<input type="number" id="c-ram" class="ram-in" min="0.5" step="0.5" value="4" inputmode="decimal"><small class="ram-hint" id="c-ram-h"></small></label>
     <div class="barra" id="barra"><i></i></div><div id="estado"></div>
     <button class="btn" id="c-ok">Instalar</button></div></div>
   <div class="view col" id="v-packs"><div class="pk">
@@ -336,6 +443,22 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
   <div class="view col" id="v-reg"><div class="tabs"><button class="chip on" data-p="log">Registro</button><button class="chip" data-p="crash">Crash report</button></div>
     <pre class="term on" id="log">Aquí verás todo lo que pasa al lanzar el juego.</pre>
     <pre class="term" id="crash">Sin errores detectados todavía.</pre></div>
+  <div class="view col" id="v-skin"><div class="aj">
+    <div><h2>Skin y capa</h2><div class="aj-sub">Guarda tus skins, elige una con un clic y se aplica a tu cuenta de Minecraft en todos los servidores.</div></div>
+    <div class="aj-card" id="sk-aviso" style="display:none"><div class="aj-msg" id="sk-aviso-t"></div><div class="fbtns"><button class="mini" id="sk-login">Iniciar sesión con Microsoft</button></div></div>
+    <div id="sk-cont" style="display:flex;flex-direction:column;gap:18px">
+      <div class="sk-cols">
+        <div class="aj-card sk-act"><h3>Actual<small id="sk-nom"></small></h3>
+          <div class="sk3d" id="sk3d" title="Arrastra para girarlo · doble clic para verlo por detrás"><div class="sk3-fig" id="sk3-fig"></div></div>
+          <div class="sk-pista">Arrastra para girarlo · doble clic para ver la espalda</div></div>
+        <div class="aj-card"><h3>Biblioteca<small id="sk-cuenta"></small></h3>
+          <div class="sk-lib" id="sk-lib"></div>
+          <div class="aj-msg" id="sk-msg"></div></div>
+      </div>
+      <div class="aj-card"><h3>Capa<small>las que tiene tu cuenta</small></h3>
+        <div class="capas" id="sk-capas"></div><div class="aj-msg" id="sk-cmsg"></div></div>
+    </div>
+  </div></div>
   <div class="view col" id="v-aj"><div class="aj">
     <div><h2>Ajustes</h2><div class="aj-sub">Personaliza cómo se ve tu launcher. Los cambios se guardan solos.</div></div>
     <div class="aj-card"><h3>Modo</h3><div class="modos" id="aj-modos">
@@ -343,7 +466,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
       <button class="modo" data-modo="oscuro"><div class="mv" style="--c1:#0b0a10;--c2:#14121c;--c3:#2a2638"></div>Oscuro</button>
       <button class="modo" data-modo="oled"><div class="mv" style="--c1:#000;--c2:#0a0a0c;--c3:#1e1e22"></div>OLED</button>
       <button class="modo" data-modo="auto"><div class="mv auto"></div>Automático</button></div>
-      <div class="aj-msg">OLED usa negro puro (ahorra batería en pantallas OLED). Automático sigue el modo de Windows.</div></div>
+      <div class="aj-msg">OLED usa negro puro (ahorra batería en pantallas OLED). Automático sigue el modo de tu sistema (Windows, macOS o Linux).</div></div>
     <div class="aj-card"><h3>Color del tema<small>acento de botones, barras y scroll</small></h3><div class="temas" id="aj-temas"></div>
       <div class="pers"><label>Color principal<input type="color" id="aj-c1"></label>
         <label>Color secundario<input type="color" id="aj-c2"></label>
@@ -355,14 +478,30 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
           <div class="rango"><span>Velo</span><input type="range" id="aj-velo" min="0" max="100"><b id="aj-velo-v"></b></div>
           <div class="rango"><span>Desenfoque</span><input type="range" id="aj-blur" min="0" max="20"><b id="aj-blur-v"></b></div></div></div>
       <div class="aj-msg" id="aj-fmsg"></div></div>
-    <div class="aj-card"><h3>CurseForge<small>para buscar e instalar mods y modpacks de CurseForge</small></h3>
-      <div class="fila-key"><input type="password" id="cf-key" placeholder="Pega aquí tu clave de API" autocomplete="off" spellcheck="false"><button class="mini" id="cf-guardar">Guardar</button><button class="mini sec" id="cf-quitar">Quitar</button></div>
-      <div class="aj-msg" id="cf-msg"></div>
-      <div class="aj-msg">Consigue una clave gratis en console.curseforge.com (con tu cuenta de CurseForge → «API Keys»). Se guarda solo en tu equipo y nunca se muestra aquí.</div></div>
+    <div class="aj-card"><h3>Rendimiento<small>inicio, descargas y memoria</small></h3>
+      <div class="rango"><span>RAM por defecto</span><input type="number" id="rd-ram" class="ram-in" min="0.5" step="0.5" inputmode="decimal"><b>GB</b></div>
+      <div class="aj-msg" id="rd-ramh"></div>
+      <div class="rango"><span>Descargas paralelas</span><input type="range" id="rd-hilos" min="1" max="32"><b id="rd-hilos-v"></b></div>
+      <div class="aj-msg">Más descargas a la vez instalan antes los modpacks, librerías y recursos. Si tu conexión falla o va lenta, baja el número.</div>
+      <div class="ajuste"><div class="sw on" id="rd-jvm"></div>Inicio más rápido (JVM optimizada)</div>
+      <div class="ajuste"><div class="sw on" id="rd-gpu"></div>Usar la GPU dedicada si hay una</div>
+      <div class="aj-msg">La GPU dedicada solo cambia algo en equipos con dos gráficas (portátiles con Intel/AMD integrada + NVIDIA/AMD). No sube los FPS en un PC normal.</div>
+      <div class="aj-msg" id="rd-msg"></div></div>
     <div class="aj-card"><div class="ajuste"><div class="sw on" id="swa"></div>Animaciones de transición</div></div>
     <div class="aj-fin"></div></div></div>
 </section>
 
+<div class="modal" id="sk-modal"><div class="m-card"><div class="m-cab"><h3 id="sk-mt">Nueva skin</h3><button class="m-x" data-cerrar>✕</button></div>
+  <div class="sk-mc"><canvas id="sk-mp" width="96" height="192"></canvas>
+    <div class="sk-mf"><label>Nombre<input class="ram-in" id="sk-mn" maxlength="24" placeholder="Mi skin" autocomplete="off"></label>
+      <div class="sk-solo-nueva"><label>Modelo</label><div class="fbtns"><button class="mini" data-mod="classic">Clásico</button><button class="mini sec" data-mod="slim">Delgado (Alex)</button></div></div>
+      <div class="aj-msg" id="sk-mh"></div>
+      <div class="up-btns" style="flex-wrap:wrap"><button class="mini sk-solo-nueva" id="sk-m-uso">Guardar y usar</button><button class="mini sec" id="sk-m-g">Guardar</button><button class="mini sec" data-cerrar>Cancelar</button></div></div></div></div></div>
+<div class="modal" id="ram-modal"><div class="m-card"><div class="m-cab"><h3 id="ram-t">Memoria RAM</h3><button class="m-x" data-cerrar>✕</button></div>
+  <div class="ram-cuerpo"><div class="ram-fila"><input type="number" id="ram-v" class="ram-in" min="0.5" step="0.5" inputmode="decimal"><b>GB</b></div>
+    <div class="fbtns" id="ram-pre"></div>
+    <div class="aj-msg" id="ram-h"></div>
+    <div class="up-btns"><button class="mini" id="ram-ok">Guardar</button><button class="mini sec" data-cerrar>Cancelar</button></div></div></div></div>
 <div class="modal" id="ico-modal"><div class="m-card"><div class="m-cab"><h3>Elige un icono</h3><button class="m-x" data-cerrar>✕</button></div>
   <div class="icogrid" id="ico-grid"></div>
   <div class="m-pie" id="ico-msg">Pulsa «+» para añadir tus propias imágenes (PNG, JPG, WEBP o GIF, hasta 2 MB). También puedes copiarlas a la carpeta <b>web/iconos</b>.</div></div></div>
@@ -381,12 +520,58 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <div class="modal" id="nw-modal"><div class="m-card"><div class="nw-hero" id="nw-hero"><button class="m-x" data-cerrar style="position:absolute;right:14px;top:14px;z-index:2">✕</button></div>
   <div class="nw-cab-t"><h2 id="nw-t"></h2><small id="nw-f"></small></div><div class="nw-cuerpo" id="nw-c"></div></div></div>
 
+<div id="notas" aria-live="polite"></div>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let usuario="",lista=[],sel=0,anim=true,jugando=false;
+let usuario="",lista=[],sel=0,anim=true,jugando=false,premium=false,cuentaInfo=null,msBusy=false;
 const api=()=>window.pywebview&&window.pywebview.api;
 const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+/* ---- intro: las letras aparecen una a una y después se muestra el inicio de sesión ---- */
+(function intro(){
+  const el=$("#intro"),box=$("#intro-logo");let fin=false;
+  /* Si existe web/logo.png (tu logo de bloques dorados) se anima la imagen; si no, se animan las letras */
+  const letras=()=>{box.innerHTML="";box.classList.remove("con-img");"DOME LAUNCHER".split("").forEach((c,i)=>{const s=document.createElement("span");
+    if(c===" "){s.className="esp"}else{s.className="l"+(i>4?" b":"");s.textContent=c;s.style.setProperty("--i",i)}box.appendChild(s)})};
+  const img=new Image();img.className="intro-img";img.alt="Dome Launcher";img.draggable=false;
+  img.onload=()=>{box.innerHTML="";box.classList.add("con-img");box.appendChild(img)};
+  img.onerror=letras;img.src="logo.png";
+  function terminar(){
+    if(fin)return;fin=true;el.classList.add("fuera");document.body.classList.remove("intro");
+    setTimeout(()=>el.remove(),900);removeEventListener("keydown",terminar);
+  }
+  el.addEventListener("click",terminar);addEventListener("keydown",terminar);
+  /* Carga real: prepara el tema, los iconos, las noticias, el rendimiento y la sesión mientras se ve la intro.
+     La barra avanza con lo que se va terminando, pero nunca más rápido que el tiempo mínimo (para que se vea fluida). */
+  const MIN=reduce?1200:5200,fill=$("#intro-fill"),pct=$("#intro-pct"),est=$("#intro-est");
+  const esperarApi=async()=>{for(let i=0;i<30&&!api();i++)await new Promise(r=>setTimeout(r,100))};
+  const tope=(p,ms)=>Promise.race([Promise.resolve().then(p).catch(()=>{}),new Promise(r=>setTimeout(r,ms))]);
+  const pasos=[
+    ["Cargando tema…",()=>initTema()],
+    ["Cargando iconos…",()=>cargarIconos()],
+    ["Buscando noticias de Minecraft…",()=>cargarNoticias()],
+    ["Optimizando rendimiento…",()=>cargarRendimiento()],
+    ["Comprobando tu sesión…",()=>pintarLogin()],
+    ["Preparando todo…",()=>new Promise(r=>setTimeout(r,500))]];
+  let hechos=0,mostrado=0;const t0=performance.now();
+  function iniciar(){
+    (async()=>{await esperarApi();for(const [,fn] of pasos){await tope(fn,6000);hechos++}})();   // uno tras otro, con el puente de Python ya listo
+    (function frame(){
+      if(fin)return;
+      const real=hechos/pasos.length*100,tiempo=Math.min(100,(performance.now()-t0)/MIN*100);
+      const meta=Math.min(real,tiempo);
+      mostrado+=(meta-mostrado)*.12+(meta>mostrado?.15:0);       // avanza suave hacia la meta
+      if(mostrado>meta)mostrado=meta;
+      const v=Math.min(100,mostrado);
+      fill.style.width=v+"%";pct.textContent=Math.floor(v)+"%";
+      est.textContent=v>=99.5?"¡Listo!":pasos[Math.min(pasos.length-1,Math.floor(v/100*pasos.length))][0];
+      if(v>=99.5&&hechos>=pasos.length){fill.style.width="100%";pct.textContent="100%";est.textContent="¡Listo!";return void setTimeout(terminar,450)}
+      requestAnimationFrame(frame);
+    })();
+  }
+  setTimeout(iniciar,0);          // después de que todo el script esté definido
+  setTimeout(terminar,20000);     // por si algo se cuelga
+})();
 /* Ejecuta un cambio de pantalla con transición. tipo: reveal (círculo desde x,y) o fade */
 function vt(fn,tipo="fade",x,y){
   if(!anim||reduce||!document.startViewTransition)return fn();
@@ -397,7 +582,7 @@ function vt(fn,tipo="fade",x,y){
 /* ---- iconos de instancia ---- */
 let icos=[];
 const ICO_DEMO=["tierra.png","cesped.png","piedra.png"];
-const icoSrc=i=>{const n=i&&i.icono;const f=icos.includes(n)?n:(icos[0]||"");return f?"iconos/"+encodeURIComponent(f):""};
+const icoSrc=i=>{if(i&&i.logo_uri)return i.logo_uri;const n=i&&i.icono;const f=icos.includes(n)?n:(icos[0]||"");return f?"iconos/"+encodeURIComponent(f):""};
 const icoUrl=n=>"iconos/"+encodeURIComponent(n);
 async function cargarIconos(){const r=api()?await api().iconos_listar():{datos:ICO_DEMO};icos=r.datos||[]}
 let icoCb=null;
@@ -451,29 +636,212 @@ $("#nw-lista").onclick=async e=>{
   if(!r.ok){$("#nw-c").innerHTML=`<p>${esc(r.error)}</p>`;return}
   $("#nw-f").textContent=fFecha(r.datos.fecha);$("#nw-c").innerHTML=r.datos.html;$("#nw-c").scrollTop=0};
 $("#nw-c").onclick=e=>{const a=e.target.closest("a");if(!a)return;e.preventDefault();if(a.dataset.ext&&api())api().abrir_enlace(a.href)};
+/* ---- rendimiento y RAM ---- */
+let rd={ram:4,hilos:8,jvm:true,gpu:true,total:0,max:32,gpuAuto:true},rdT=0;
+function ramHint(){return rd.total?`Tu equipo tiene ${rd.total} GB. Puedes poner decimales (ej. 6.5). Deja libres 2–3 GB para el sistema.`:"Puedes poner decimales (ej. 6.5)."}
+function rdMsg(t,err){const m=$("#rd-msg");m.textContent=t||"";m.classList.toggle("err",!!err)}
+function pintarRend(){
+  $("#rd-ram").value=rd.ram;$("#rd-ram").max=rd.total||"";$("#rd-hilos").max=rd.max;$("#rd-hilos").value=rd.hilos;$("#rd-hilos-v").textContent=rd.hilos;
+  $("#rd-jvm").classList.toggle("on",rd.jvm);$("#rd-gpu").classList.toggle("on",rd.gpu);
+  $("#rd-gpu").parentElement.style.display=rd.gpuAuto?"":"none";
+  $("#rd-ramh").textContent=ramHint();$("#c-ram-h").textContent=ramHint();$("#c-ram").max=rd.total||"";
+  if(!$("#c-ram").dataset.tocado)$("#c-ram").value=rd.ram;
+}
+async function cargarRendimiento(){
+  if(!api()){pintarRend();return}
+  try{const r=await api().rendimiento_estado();const c=r.cfg||{};
+    rd={ram:c.ram??4,hilos:c.hilos??8,jvm:c.jvm!==false,gpu:c.gpu!==false,total:r.ram_total||0,max:r.hilos_max||32,gpuAuto:r.gpu_auto!==false};
+  }catch(e){}
+  pintarRend();
+}
+async function guardarRend(){
+  if(!api())return;
+  const r=await api().rendimiento_guardar({ram:$("#rd-ram").value.replace(",","."),hilos:+$("#rd-hilos").value,jvm:$("#rd-jvm").classList.contains("on"),gpu:$("#rd-gpu").classList.contains("on")});
+  if(!r.ok){rdMsg(r.error,true);return}
+  const c=r.cfg;rd.ram=c.ram;rd.hilos=c.hilos;rd.jvm=c.jvm;rd.gpu=c.gpu;pintarRend();rdMsg("Guardado.");clearTimeout(rdT);rdT=setTimeout(()=>rdMsg(""),2000);
+}
+$("#c-ram").oninput=()=>{$("#c-ram").dataset.tocado="1"};
+$("#rd-hilos").oninput=()=>{$("#rd-hilos-v").textContent=$("#rd-hilos").value};
+$("#rd-hilos").onchange=guardarRend;
+$("#rd-ram").onchange=guardarRend;
+["#rd-jvm","#rd-gpu"].forEach(s=>$(s).onclick=()=>{$(s).classList.toggle("on");guardarRend()});
+const RAM_PRE=[2,4,6,8,12,16];
+function abrirRam(){
+  const i=lista[sel];if(!i)return;
+  $("#ram-t").textContent="Memoria RAM · "+i.nombre;$("#ram-v").value=i.ram||4;$("#ram-v").max=rd.total||"";
+  $("#ram-pre").innerHTML=RAM_PRE.filter(g=>!rd.total||g<=rd.total).map(g=>`<button class="mini sec" data-g="${g}">${g} GB</button>`).join("");
+  $("#ram-h").textContent=ramHint();$("#ram-h").classList.remove("err");$("#ram-modal").classList.add("on");$("#ram-v").focus();
+}
+$("#meta").onclick=e=>{if(e.target.closest("#meta-ram"))abrirRam()};
+$("#ram-pre").onclick=e=>{const b=e.target.closest("[data-g]");if(b)$("#ram-v").value=b.dataset.g};
+$("#ram-ok").onclick=async()=>{
+  const i=lista[sel];if(!i||!api())return;
+  const r=await api().instancia_ram(i.nombre,$("#ram-v").value.replace(",","."));
+  if(!r.ok){$("#ram-h").textContent=r.error;$("#ram-h").classList.add("err");return}
+  i.ram=r.ram;pintar();cerrarModal($("#ram-modal"));
+};
 function pintar(){
   const i=lista[sel];
   $("#tit").textContent=i?i.nombre:"Sin instancias";
-  $("#meta").textContent=i?`${i.tipo||"Vanilla"} · Minecraft ${i.version_target||i.version_id} · ${i.ram||4} GB de RAM · ${i.mods||0} mods`:"Crea una instancia para empezar a jugar.";
-  $("#usr").textContent="Sesión de "+usuario;
-  $("#chips").innerHTML=lista.map((x,n)=>`<button class="chip ${n==sel?"on":""}" data-n="${n}"><img class="ci" src="${icoSrc(x)}" alt="">${esc(x.nombre)}</button>`).join("");
-  $("#h-ico").style.display=i?"":"none";if(i)$("#h-ico img").src=icoSrc(i);
+  $("#meta").innerHTML=i?`${esc(i.tipo||"Vanilla")} · Minecraft ${esc(i.version_target||i.version_id)} · <a class="meta-ram" id="meta-ram" title="Cambiar la RAM de esta instancia">${esc(String(i.ram||4))} GB de RAM</a> · ${+i.mods||0} mods`:"Crea una instancia para empezar a jugar.";
+  $("#usr").textContent="Sesión de "+usuario+(premium?" · premium":" · sin conexión");
+  $("#ib-lista").innerHTML=lista.map((x,n)=>`<button class="ib ${n==sel?"on":""}" data-n="${n}" title="${esc(x.nombre)}"><img class="${x.logo_uri?"logo":""}" src="${icoSrc(x)}" alt=""></button>`).join("");
+  const on=$("#ib-lista .ib.on");if(on)on.scrollIntoView({block:"nearest"});
+  $("#h-ico").style.display=i?"":"none";if(i){const im=$("#h-ico img");im.src=icoSrc(i);im.classList.toggle("logo",!!i.logo_uri)}
   $("#h-upd").classList.toggle("ocu",!(i&&i.pack));
 }
-$("#chips").onclick=e=>{const b=e.target.closest(".chip");if(b&&+b.dataset.n!==sel)vt(()=>{sel=+b.dataset.n;pintar()})};
-$$(".side [data-v]").forEach(b=>b.onclick=()=>{vt(()=>irA(b.dataset.v));if(b.dataset.v==="crear"&&!$("#c-ver").options.length)cargarVersiones(tipo);if(b.dataset.v==="packs")abrirContenido();if(b.dataset.v==="aj")pintarCF()});
-async function entrar(e){
-  const n=$("#nick").value.trim();
-  if(!n){const i=$("#nick");i.classList.remove("err");void i.offsetWidth;i.classList.add("err");return}
-  usuario=n;const r=e.currentTarget.getBoundingClientRect();
-  const est=api()?await api().estado():{instancias:[{nombre:"Mi Survival",tipo:"Vanilla",version_id:"1.20.1",ram:"4"},{nombre:"Modpack Forge",tipo:"Forge",version_id:"1.20.1-forge",ram:"6"}],config:{}};
-  await cargarIconos();if(!cIcono)cIcono=icos[0]||"";pintarCIcono();cargarNoticias();
+$("#ib-lista").onclick=e=>{const b=e.target.closest(".ib");if(b&&+b.dataset.n!==sel)vt(()=>{sel=+b.dataset.n;pintar();irA("home")})};
+window.onLogos=async()=>{if(!api())return;const n=lista[sel]&&lista[sel].nombre;lista=(await api().estado()).instancias;sel=Math.max(0,lista.findIndex(i=>i.nombre===n));pintar()};
+$$(".side [data-v]").forEach(b=>b.onclick=()=>{vt(()=>irA(b.dataset.v));if(b.dataset.v==="crear"&&!$("#c-ver").options.length)cargarVersiones(tipo);if(b.dataset.v==="packs")abrirContenido();if(b.dataset.v==="skin")pintarSkin()});
+async function abrir(n,esPrem,origen){
+  usuario=n;premium=esPrem;const r=origen.getBoundingClientRect();
+  const pEst=api()?Promise.all([api().cuenta_modo(esPrem),api().estado()]).then(x=>x[1]):Promise.resolve({instancias:[{nombre:"Mi Survival",tipo:"Vanilla",version_id:"1.20.1",ram:"4"},{nombre:"Modpack Forge",tipo:"Forge",version_id:"1.20.1-forge",ram:"6"}],config:{}});
+  cargarNoticias();cargarRendimiento();
+  const [est]=await Promise.all([pEst,cargarIconos()]);
+  if(!cIcono)cIcono=icos[0]||"";pintarCIcono();if(api()){api().logos_completar();setTimeout(()=>{if(!$("#c-ver").options.length)cargarVersiones(tipo)},1500)}
   lista=est.instancias;anim=est.config.animaciones!==false;$("#swa").classList.toggle("on",anim);
   vt(()=>{$("#login").style.display="none";$("#app").style.display="block";pintar()},"reveal",r.left+r.width/2,r.top+r.height/2);
 }
+async function entrar(e){
+  const n=$("#nick").value.trim();
+  if(!/^\w{1,16}$/.test(n)){const i=$("#nick");i.classList.remove("err");void i.offsetWidth;i.classList.add("err");return}
+  abrir(n,false,e.currentTarget);
+}
+/* ---- cuenta premium (Microsoft) ---- */
+function msMsg(t,err){const m=$("#ms-msg");m.textContent=t||"";m.classList.toggle("err",!!err)}
+async function pintarLogin(){
+  const r=api()?await api().cuenta_estado():{client_configurado:true,cuenta:null};cuentaInfo=r.cuenta;
+  $("#ms-txt").textContent=r.cuenta?`Continuar como ${r.cuenta.nombre}`:"Iniciar sesión con Microsoft";
+  $("#ms-otra").classList.toggle("ocu",!r.cuenta);
+  if(!msBusy)msMsg(!r.cuenta&&!r.client_configurado?"El inicio de sesión con Microsoft no está disponible ahora mismo. Puedes jugar sin conexión.":"")}
+function msEspera(on){msBusy=on;$("#ms-entrar").disabled=on;$("#ms-otra").disabled=on;if(on)msMsg("Completa el inicio de sesión en la ventana de Microsoft…")}
+$("#ms-entrar").onclick=async e=>{
+  if(msBusy)return;
+  if(cuentaInfo)return abrir(cuentaInfo.nombre,true,e.currentTarget);
+  if(!api())return abrir("Steve",true,e.currentTarget);
+  msEspera(true);const r=await api().cuenta_login();
+  if(!r.ok){msEspera(false);msMsg(r.error,true)}};
+$("#ms-otra").onclick=async()=>{if(msBusy||!api())return;await api().cuenta_cerrar();cuentaInfo=null;await pintarLogin();$("#ms-entrar").click()};
+window.onCuentaLogin=r=>{msEspera(false);
+  if(!r.ok){msMsg(r.cancelado?"":r.error,!r.cancelado);return}
+  cuentaInfo=r.estado.cuenta;msMsg("");pintarLogin();abrir(cuentaInfo.nombre,true,$("#ms-entrar"))};
+window.onCuentaCerrada=r=>{cuentaInfo=r.cuenta;premium=false;pintarLogin();if($("#app").style.display==="block")pintar()};
 $("#entrar").onclick=entrar;$("#nick").onkeydown=e=>{if(e.key==="Enter")$("#entrar").click()};
-$("#salir").onclick=()=>vt(()=>{$("#app").style.display="none";$("#login").style.display="block"});
+$("#salir").onclick=()=>{pintarLogin();vt(()=>{$("#app").style.display="none";$("#login").style.display="block"})};
+pintarLogin();
 $("#swa").onclick=()=>{anim=!anim;$("#swa").classList.toggle("on",anim);api()&&api().config_guardar("animaciones",anim)};
+/* ---- skin y capa ---- */
+let skModelo="classic",skBusy=false,skPerfil=null,skLib={skins:[],activa:""},skEdit=null,skSure=null,skAng=-30;
+const imgDe=src=>new Promise(r=>{if(!src)return r(null);const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
+function dibujarPersonaje(cv,skin,capa,espalda,slim){
+  const k=cv.width/16,c=cv.getContext("2d");c.imageSmoothingEnabled=false;c.clearRect(0,0,cv.width,cv.height);
+  if(!skin)return;const nuevo=skin.height>=64,aw=slim?3:4;
+  const P=(sx,sy,sw,sh,dx,dy,esp)=>{if(esp){c.save();c.translate((dx+sw)*k,0);c.scale(-1,1);c.drawImage(skin,sx,sy,sw,sh,0,dy*k,sw*k,sh*k);c.restore()}else c.drawImage(skin,sx,sy,sw,sh,dx*k,dy*k,sw*k,sh*k)};
+  if(!espalda){
+    P(8,8,8,8,4,0);P(20,20,8,12,4,8);P(4,20,4,12,4,20);P(44,20,aw,12,slim?1:0,8);
+    if(nuevo){P(36,52,4,12,8,20);P(44,52,aw,12,12,8)}else{P(4,20,4,12,8,20,true);P(44,20,aw,12,12,8,true)}
+    P(40,8,8,8,4,0);if(nuevo){P(20,36,8,12,4,8);P(4,36,4,12,4,20);P(4,52,4,12,8,20);P(44,36,aw,12,slim?1:0,8);P(52,52,aw,12,12,8)}
+  }else{
+    P(24,8,8,8,4,0);P(32,20,8,12,4,8);P(12,20,4,12,8,20);P(aw===3?51:52,20,aw,12,12,8);
+    if(nuevo){P(28,52,4,12,4,20);P(aw===3?43:44,52,aw,12,slim?1:0,8)}else{P(12,20,4,12,4,20,true);P(52,20,aw,12,slim?1:0,8,true)}
+    P(56,8,8,8,4,0);if(nuevo){P(32,36,8,12,4,8);P(12,36,4,12,8,20);P(12,52,4,12,4,20);P(aw===3?51:52,36,aw,12,12,8);P(aw===3?59:60,52,aw,12,slim?1:0,8)}
+    if(capa)c.drawImage(capa,1,1,10,16,3*k,8*k,10*k,16*k)}
+}
+/* visor 3D: cada parte es una caja CSS 3D con sus caras dibujadas desde la textura de la skin */
+const S3=9;
+function cara(img,x,y,w,h,flip){const c=document.createElement("canvas");c.width=w;c.height=h;const g=c.getContext("2d");g.imageSmoothingEnabled=false;
+  if(img){if(flip){g.translate(w,0);g.scale(-1,1)}g.drawImage(img,x,y,w,h,0,0,w,h)}return c}
+function caja(img,u,v,w,h,d,cx,cy,cz,o={}){
+  const inf=o.inf||0,W=w+2*inf,H=h+2*inf,D=d+2*inf,p=document.createElement("div");p.className="sk3-p";
+  p.style.transform=o.tf||`translate3d(${cx*S3}px,${(cy-16)*S3}px,${cz*S3}px)`;
+  const R={front:[u+d,v+d,w,h],back:[u+2*d+w,v+d,w,h],right:[u,v+d,d,h],left:[u+d+w,v+d,d,h],top:[u+d,v,w,d],bottom:[u+d+w,v,w,d]};
+  const sw={right:"left",left:"right"},E=S3;
+  const C=[["front",W,H,`translateZ(${D*E/2}px)`],["back",W,H,`rotateY(180deg) translateZ(${D*E/2}px)`],
+    ["right",D,H,`rotateY(-90deg) translateZ(${W*E/2}px)`],["left",D,H,`rotateY(90deg) translateZ(${W*E/2}px)`],
+    ["top",W,D,`rotateX(90deg) translateZ(${H*E/2}px)`],["bottom",W,D,`rotateX(-90deg) translateZ(${H*E/2}px)`]];
+  for(const [k,fw,fh,tf] of C){const r=R[o.espejo?(sw[k]||k):k],c=cara(img,r[0],r[1],r[2],r[3],!!o.espejo);
+    c.style.cssText=`left:${-fw*E/2}px;top:${-fh*E/2}px;width:${fw*E}px;height:${fh*E}px;transform:${tf}`;p.appendChild(c)}
+  return p}
+function pintar3D(skin,capa,slim){
+  const fig=$("#sk3-fig");fig.innerHTML="";if(!skin)return;
+  const nuevo=skin.height>=64,aw=slim?3:4,B=(u,v,w,h,d,x,y,z,o)=>fig.appendChild(caja(skin,u,v,w,h,d,x,y,z,o)),o={inf:.25};
+  B(0,0,8,8,8,0,4,0);B(16,16,8,12,4,0,14,0);B(40,16,aw,12,4,-(4+aw/2),14,0);B(0,16,4,12,4,-2,26,0);
+  if(nuevo){B(32,48,aw,12,4,4+aw/2,14,0);B(16,48,4,12,4,2,26,0)}else{B(40,16,aw,12,4,4+aw/2,14,0,{espejo:true});B(0,16,4,12,4,2,26,0,{espejo:true})}
+  B(32,0,8,8,8,0,4,0,{inf:.5});
+  if(nuevo){B(16,32,8,12,4,0,14,0,o);B(40,32,aw,12,4,-(4+aw/2),14,0,o);B(48,48,aw,12,4,4+aw/2,14,0,o);B(0,32,4,12,4,-2,26,0,o);B(0,48,4,12,4,2,26,0,o)}
+  if(capa)fig.appendChild(caja(capa,0,0,10,16,1,0,0,0,{tf:`translate3d(0px,${(8-16)*S3}px,${-2.6*S3}px) rotateX(-5deg) rotateY(180deg) translateY(${8*S3}px)`}));
+  fig.style.setProperty("--ry",skAng+"deg")}
+(function(){const v=$("#sk3d"),fig=$("#sk3-fig");let x0=null,a0=0;
+  v.addEventListener("pointerdown",e=>{x0=e.clientX;a0=skAng;fig.classList.remove("gira");v.classList.add("arr");try{v.setPointerCapture(e.pointerId)}catch(_){}});
+  v.addEventListener("pointermove",e=>{if(x0===null)return;skAng=a0+(e.clientX-x0)*.8;fig.style.setProperty("--ry",skAng+"deg")});
+  const fin=()=>{x0=null;v.classList.remove("arr")};v.addEventListener("pointerup",fin);v.addEventListener("pointercancel",fin);
+  v.addEventListener("dblclick",()=>{fig.classList.add("gira");skAng=Math.round(skAng/180)*180+180;fig.style.setProperty("--ry",skAng+"deg")})})();
+const skMsg=(t,err)=>{const m=$("#sk-msg");m.classList.toggle("err",!!err);m.textContent=t||""};
+async function pintarSkin(){
+  const av=$("#sk-aviso");
+  if(!premium||!api()){av.style.display="";$("#sk-cont").style.display="none";
+    $("#sk-aviso-t").textContent=api()?"Estás jugando sin conexión. Para cambiar tu skin y tu capa inicia sesión con tu cuenta premium de Microsoft.":"Vista previa: aquí se cambian la skin y la capa.";return}
+  av.style.display="none";$("#sk-cont").style.display="flex";skMsg("Cargando tu perfil…");
+  const r=await api().skins_estado();if(!r.ok){skMsg(r.error,true);return}
+  skMsg("");await aplicarDatos(r.datos)}
+async function aplicarDatos(d){
+  if(d.perfil)skPerfil=d.perfil;if(d.lib)skLib=d.lib;const p=skPerfil;if(!p)return;
+  skModelo=p.variante;$("#sk-nom").textContent=p.nombre;
+  const skin=await imgDe(p.skin),act=p.capas.find(c=>c.activa),capaImg=act?await imgDe(act.img):null;
+  pintar3D(skin,capaImg,p.variante==="slim");
+  const cont=$("#sk-capas");cont.innerHTML="";
+  const mk=(id,txt,activa,img)=>{const b=document.createElement("button");b.className="capa"+(activa?" on":"");b.dataset.id=id;
+    if(img){const cv=document.createElement("canvas");cv.width=10;cv.height=16;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;x.drawImage(img,1,1,10,16,0,0,10,16);b.appendChild(cv)}
+    else{const n=document.createElement("div");n.className="nada";n.textContent="∅";b.appendChild(n)}
+    const t=document.createElement("span");t.textContent=txt;b.appendChild(t);cont.appendChild(b)};
+  mk("","Sin capa",!act,null);
+  for(const c of p.capas)mk(c.id,c.alias,c.activa,await imgDe(c.img));
+  $("#sk-cmsg").textContent=p.capas.length?"":"Tu cuenta no tiene ninguna capa todavía.";
+  await pintarLib()}
+async function pintarLib(){
+  const cont=$("#sk-lib"),imgs=await Promise.all(skLib.skins.map(s=>imgDe(s.uri)));cont.innerHTML="";skSure=null;
+  $("#sk-cuenta").textContent=skLib.skins.length?skLib.skins.length+(skLib.skins.length===1?" skin":" skins"):"";
+  const n=document.createElement("div");n.className="sk-it nuevo";n.tabIndex=0;n.innerHTML='<span class="mas">+</span><span class="n">Nueva skin</span>';n.onclick=skNueva;cont.appendChild(n);
+  skLib.skins.forEach((s,i)=>{const c=document.createElement("div");c.className="sk-it"+(s.id===skLib.activa?" on":"");c.dataset.id=s.id;c.tabIndex=0;c.title="Usar «"+s.nombre+"»";
+    const t=document.createElement("span");t.className="n";t.textContent=s.nombre;c.appendChild(t);
+    const cv=document.createElement("canvas");cv.width=96;cv.height=192;dibujarPersonaje(cv,imgs[i],null,false,s.variante==="slim");c.appendChild(cv);
+    const ac=document.createElement("div");ac.className="sk-ac";
+    const ed=document.createElement("button");ed.textContent="✎";ed.title="Cambiar nombre";ed.onclick=e=>{e.stopPropagation();skEditar(s,imgs[i])};
+    const de=document.createElement("button");de.className="del";de.textContent="🗑";de.title="Quitar de la biblioteca";de.onclick=e=>{e.stopPropagation();skQuitar(s,de)};
+    ac.append(ed,de);c.appendChild(ac);c.onclick=()=>skAplicar(s);c.onkeydown=e=>{if(e.key==="Enter")c.click()};cont.appendChild(c)})}
+async function skAplicar(s){if(skBusy||!api())return;skBusy=true;$("#sk-lib").classList.add("busy");skMsg("Aplicando «"+s.nombre+"»…");
+  const r=await api().skin_aplicar(s.id);skBusy=false;$("#sk-lib").classList.remove("busy");
+  if(!r.ok){skMsg(r.error,true);return}
+  skMsg("Skin cambiada ✓ (puede tardar unos segundos en verse en el juego)");await aplicarDatos(r.datos)}
+async function skQuitar(s,b){
+  if(skSure!==s.id){skSure=s.id;b.classList.add("sure");b.textContent="¿Quitar?";setTimeout(()=>{if(skSure===s.id&&b.isConnected){skSure=null;b.classList.remove("sure");b.textContent="🗑"}},3000);return}
+  skSure=null;const r=await api().skin_borrar(s.id);if(!r.ok){skMsg(r.error,true);return}skMsg("");await aplicarDatos(r.datos)}
+async function skNueva(){if(skBusy||!api())return;skBusy=true;skMsg("Elige el archivo…");
+  const r=await api().skin_nueva_elegir();skBusy=false;
+  if(!r.ok){skMsg(r.cancelado?"":r.error,!r.cancelado);return}skMsg("");
+  abrirModalSkin({modo:"nueva",nombre:r.datos.nombre,img:await imgDe(r.datos.uri)})}
+function skEditar(s,img){abrirModalSkin({modo:"editar",id:s.id,nombre:s.nombre,img,variante:s.variante})}
+function skSlimDe(img){if(!img||img.height<64)return false;const c=document.createElement("canvas");c.width=64;c.height=64;const g=c.getContext("2d",{willReadFrequently:true});g.drawImage(img,0,0);
+  const a=g.getImageData(50,16,2,4).data,b=g.getImageData(42,48,2,4).data;let t=0,u=0;for(let i=3;i<a.length;i+=4){t+=a[i];u+=b[i]}return t===0&&u===0}
+function skPrevModal(){dibujarPersonaje($("#sk-mp"),skEdit&&skEdit.img,null,false,skModelo==="slim");$$("#sk-modal [data-mod]").forEach(x=>x.classList.toggle("sec",x.dataset.mod!==skModelo))}
+function abrirModalSkin(o){skEdit=o;const m=$("#sk-modal");m.classList.toggle("edit",o.modo==="editar");
+  $("#sk-mt").textContent=o.modo==="nueva"?"Nueva skin":"Editar skin";$("#sk-mn").value=o.nombre||"";$("#sk-mh").textContent="";$("#sk-mh").classList.remove("err");
+  skModelo=o.variante||(skSlimDe(o.img)?"slim":"classic");skPrevModal();m.classList.add("on");setTimeout(()=>$("#sk-mn").focus(),50)}
+$$("#sk-modal [data-mod]").forEach(b=>b.onclick=()=>{skModelo=b.dataset.mod;skPrevModal()});
+async function skGuardar(usar){if(skBusy||!skEdit||!api())return;const h=$("#sk-mh"),nom=$("#sk-mn").value.trim()||"Mi skin";
+  skBusy=true;h.classList.remove("err");h.textContent=usar?"Guardando y aplicando…":"Guardando…";$$("#sk-modal .mini").forEach(x=>x.disabled=true);
+  const r=skEdit.modo==="nueva"?await api().skin_nueva_guardar(nom,skModelo,usar):await api().skin_renombrar(skEdit.id,nom);
+  skBusy=false;$$("#sk-modal .mini").forEach(x=>x.disabled=false);
+  if(!r.ok){h.classList.add("err");h.textContent=r.error;return}
+  cerrarModal($("#sk-modal"));skMsg(usar?"Skin cambiada ✓ (puede tardar unos segundos en verse en el juego)":"");await aplicarDatos(r.datos)}
+$("#sk-m-uso").onclick=()=>skGuardar(true);$("#sk-m-g").onclick=()=>skGuardar(false);
+$("#sk-mn").addEventListener("keydown",e=>{if(e.key==="Enter")skGuardar(skEdit&&skEdit.modo==="nueva")});
+$("#sk-capas").onclick=async e=>{const b=e.target.closest(".capa");if(!b||skBusy||!api())return;
+  skBusy=true;$$(".capa").forEach(x=>x.disabled=true);const m=$("#sk-cmsg");m.classList.remove("err");m.textContent="Aplicando…";
+  const r=await api().capa_activar(b.dataset.id||null);skBusy=false;
+  if(!r.ok){m.classList.add("err");m.textContent=r.error;$$(".capa").forEach(x=>x.disabled=false);return}
+  m.textContent="Capa cambiada ✓";await aplicarDatos({perfil:r.datos})};
+$("#sk-login").onclick=()=>{$("#salir").click()};
 /* ---- Tema: modo claro / oscuro / OLED / auto, colores, fondo (imagen o GIF) ---- */
 const PRESETS=[["Violeta","#8b5cf6",""],["Océano","#3b82f6",""],["Cian","#06b6d4",""],["Esmeralda","#10b981",""],["Lima","#84cc16",""],["Ámbar","#f59e0b",""],
   ["Naranja","#f97316",""],["Rosa","#ec4899",""],["Rojo","#ef4444",""],["Grafito","#94a3b8",""],
@@ -555,13 +923,15 @@ async function initTema(){
   if(temaListo)return;temaListo=true;
   if(api()){try{const r=await api().tema_obtener();tema=r.tema;anim=r.animaciones;$("#swa").classList.toggle("on",anim);await ponerFondo(await api().fondo_datos())}catch(e){}}
   aplicarTema()}
-addEventListener("pywebviewready",initTema);
+addEventListener("pywebviewready",()=>{initTema();pintarLogin()});
 if(api())initTema();else setTimeout(initTema,400);
 aplicarTema();
 $("#jugar").onclick=()=>{const i=lista[sel];if(!i||jugando)return;api()?api().jugar(i.nombre,usuario):onEstadoJuego(true)};
-$("#min").onclick=()=>api()&&api().minimizar();$("#cer").onclick=()=>api()?api().cerrar():window.close();
+$("#min").onclick=()=>api()&&api().minimizar();
+async function alternarMax(){if(!api())return;const r=await api().maximizar();$("#max").textContent=r&&r.maximizada?"❐":"☐";$("#max").title=r&&r.maximizada?"Restaurar":"Maximizar"}
+$("#max").onclick=alternarMax;document.querySelector(".top").addEventListener("dblclick",e=>{if(e.target.closest("button"))return;alternarMax()});$("#cer").onclick=()=>api()?api().cerrar():window.close();
 window.onLog=l=>{const r=$("#log");if(r.dataset.v!=="1"){r.textContent="";r.dataset.v="1"}r.textContent+=l+"\n";r.scrollTop=1e9};
-function irA(v){$$(".side [data-v]").forEach(x=>x.classList.toggle("on",x.dataset.v===v));$$(".view").forEach(x=>x.classList.toggle("on",x.id==="v-"+v));$("#chips").style.display=v==="home"?"flex":"none"}
+function irA(v){$$(".side [data-v]").forEach(x=>x.classList.toggle("on",x.dataset.v===v));$$(".view").forEach(x=>x.classList.toggle("on",x.id==="v-"+v))}
 function pestana(p){$$("[data-p]").forEach(b=>b.classList.toggle("on",b.dataset.p===p));$$(".term").forEach(t=>t.classList.toggle("on",t.id===p))}
 $$("[data-p]").forEach(b=>b.onclick=()=>pestana(b.dataset.p));
 window.onCrash=c=>{$("#crash").textContent=`Versión: ${c.version}\n\n${c.texto}`;vt(()=>{irA("reg");pestana("crash")})};
@@ -576,7 +946,7 @@ $("#c-ok").onclick=()=>{
   const nom=$("#c-nom").value.trim();if(!nom||instalando)return estado(nom?"":"Escribe un nombre para la instancia.",!nom);
   if($("#c-ver").disabled)return estado("Espera a que cargue la lista de versiones.",true);
   instalando=true;$("#c-ok").disabled=true;$("#barra").style.display="block";$("#barra i").style.width="0";estado("Preparando…");
-  api()&&api().crear({nombre:nom,tipo,version:$("#c-ver").value,ram:$("#c-ram").value,icono:cIcono});
+  api()&&api().crear({nombre:nom,tipo,version:$("#c-ver").value,ram:$("#c-ram").value.replace(",","."),icono:cIcono});
 };
 window.onProgreso=p=>{estado(p.estado);$("#barra i").style.width=(p.max?Math.round(p.valor/p.max*100):0)+"%"};
 window.onErrorInstalar=m=>{instalando=false;$("#c-ok").disabled=false;$("#barra").style.display="none";estado("No se pudo instalar: "+m,true)};
@@ -585,8 +955,34 @@ window.onInstalada=async n=>{
   lista=(await api().estado()).instancias;sel=Math.max(0,lista.findIndex(i=>i.nombre===n));
   vt(()=>{irA("home");pintar()},"reveal")};
 $("#carp").onclick=()=>{const i=lista[sel];if(i&&api())api().abrir_carpeta(i.nombre)};
-$("#elim").onclick=async()=>{const i=lista[sel];if(!i||!confirm(`¿Eliminar '${i.nombre}'? Se borrará la instancia con sus mods y mundos.`))return;
-  api()&&await api().eliminar(i.nombre);lista.splice(sel,1);sel=0;vt(pintar)};
+$("#elim").onclick=async()=>{
+  const i=lista[sel];if(!i)return;const nombre=i.nombre;
+  if(!await confirmarAviso({titulo:`¿Eliminar «${nombre}»?`,detalle:"Se borrarán sus mods y mundos."}))return;
+  try{if(api())await api().eliminar(nombre)}catch(e){return notificar("No se pudo eliminar la instancia.","error")}
+  const k=lista.findIndex(x=>x.nombre===nombre);       // el aviso no bloquea: la selección pudo cambiar mientras tanto
+  if(k>=0)lista.splice(k,1);sel=0;vt(pintar);notificar(`Instancia «${nombre}» eliminada`)};
+/* ---- Notificaciones propias: sustituyen a los cuadros nativos ("127.0.0.1 dice") ---- */
+function cerrarNota(n){if(!n||!n.isConnected)return;n.classList.add("sale");setTimeout(()=>n.remove(),220)}
+function notificar(texto,tipo="ok",ms=3800){
+  const n=document.createElement("div");n.className="nota "+tipo;n.setAttribute("role","status");
+  n.innerHTML='<div class="n-ico"></div><div class="n-t"></div>';
+  n.querySelector(".n-ico").textContent=tipo==="ok"?"✓":"✕";n.querySelector(".n-t").textContent=texto;
+  $("#notas").appendChild(n);setTimeout(()=>cerrarNota(n),ms);return n}
+let notaConf=null;
+/* Aviso con dos botones. Devuelve una promesa: true si aceptan, false si cancelan (botón, Esc o 15 s sin respuesta). */
+function confirmarAviso({titulo,detalle="",aceptar="Eliminar",cancelar="Cancelar",ms=15000}){
+  return new Promise(res=>{
+    if(notaConf)notaConf.fin(false);
+    const n=document.createElement("div");n.className="nota peligro";n.setAttribute("role","alertdialog");
+    n.innerHTML='<div class="n-ico">!</div><div class="n-t"><b></b><span></span></div><div class="n-b"><button class="mini sec" data-r="0"></button><button class="mini peligro" data-r="1"></button></div>';
+    n.querySelector("b").textContent=titulo;n.querySelector("span").textContent=detalle;
+    n.querySelector('[data-r="0"]').textContent=cancelar;n.querySelector('[data-r="1"]').textContent=aceptar;
+    let t=0;
+    const tecla=e=>{if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fin(false)}};
+    function fin(v){clearTimeout(t);removeEventListener("keydown",tecla,true);if(notaConf&&notaConf.n===n)notaConf=null;cerrarNota(n);res(v)}
+    n.onclick=e=>{const b=e.target.closest("[data-r]");if(b)fin(b.dataset.r==="1")};
+    addEventListener("keydown",tecla,true);t=setTimeout(()=>fin(false),ms);
+    notaConf={n,fin};$("#notas").appendChild(n);n.querySelector('[data-r="0"]').focus()})}
 /* ---- Centro de contenido: modpacks, mods, resource packs, data packs y shaders ---- */
 const fmtN=n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?Math.round(n/1e3)+"k":String(n);
 const ETQ={modpack:"Modpack",mod:"Mod",resourcepack:"Resource Pack",datapack:"Data Pack",shader:"Shader"};
@@ -613,8 +1009,7 @@ function llenarInstancias(){
 function ajustarPanel(){
   const cfu=pFuente==="curseforge";
   $("#p-sec-load").classList.toggle("ocu",pTipo!=="modpack"&&pTipo!=="mod");
-  $("#p-sec-cat").classList.toggle("ocu",cfu);$("#p-cf-nota").classList.toggle("ocu",!cfu);
-  $$("#p-fil [data-ty]").forEach(x=>{if(["resourcepack","datapack","shader"].includes(x.dataset.ty))x.classList.toggle("ocu",cfu)});
+  $("#p-cf-nota").classList.toggle("ocu",!cfu);
   $("#p-instbox").classList.toggle("ocu",cTab==="exp"&&pTipo==="modpack");
   $("#p-q").placeholder=`Buscar ${PLU[pTipo]}…`;$("#p-tit").textContent=ETQ[pTipo];$("#m-loader").textContent=loaderDe(instActual())||(lista.length?"vanilla":"")}
 async function cargarVersionesJuego(){
@@ -625,8 +1020,9 @@ async function cargarVersionesJuego(){
   s.insertAdjacentHTML("beforeend",r.datos.map(v=>`<option>${esc(v)}</option>`).join(""));s.value=cur}
 async function cargarCategorias(t){
   const box=$("#p-cats");box.innerHTML="";if(!api())return;
-  if(pFuente==="curseforge")return;const r=await api().contenido_categorias(t,pFuente);if(t!==pTipo||!r.ok)return;
-  box.innerHTML=r.datos.map(c=>`<button class="fchip ${pFil.cats.has(c)?"on":""}" data-c="${esc(c)}">${esc(nombreCat(c))}</button>`).join("")}
+  const fu=pFuente,r=await api().contenido_categorias(t,fu);if(t!==pTipo||fu!==pFuente||!r.ok)return;
+  box.innerHTML=r.datos.map(x=>{const c=typeof x==="string"?{id:x,nombre:nombreCat(x)}:x;   // Modrinth: nombre; CurseForge: {id, nombre}
+    return`<button class="fchip ${pFil.cats.has(c.id)?"on":""}" data-c="${esc(c.id)}">${esc(c.nombre)}</button>`}).join("");$("#p-sec-cat").classList.toggle("ocu",!r.datos.length)}
 /* Para mods, resource packs, etc. el buscador parte de la versión (y loader) de la instancia elegida */
 function aplicarContexto(){
   pFil.loaders.clear();$$("#p-fil [data-l]").forEach(x=>x.classList.remove("on"));
@@ -642,7 +1038,6 @@ function cambiarTipo(t){
   pFil.cats.clear();ajustarPanel();aplicarContexto();cargarCategorias(t);buscarPacks(0)}
 function cambiarFuente(f){
   pFuente=f;$$("#p-fil [data-fu]").forEach(x=>x.classList.toggle("on",x.dataset.fu===f));
-  if(f==="curseforge"&&pTipo!=="modpack"&&pTipo!=="mod")return cambiarTipo("modpack");
   pFil.cats.clear();ajustarPanel();aplicarContexto();cargarCategorias(pTipo);buscarPacks(0)}
 function refrescarExplorar(){pSucio=false;if(pTipo!=="modpack")aplicarContexto();buscarPacks(0)}
 async function abrirContenido(){
@@ -719,7 +1114,7 @@ $("#p-res").onclick=async e=>{
     if(!r.datos.length)return pInfo(pFuente==="curseforge"?"Ese modpack no tiene versiones instalables (.zip).":"Ese modpack no tiene versiones instalables (.mrpack).",true);
     box.innerHTML=`<select data-k="v">${r.datos.map(v=>`<option value="${esc(v.id)}">${esc(v.nombre)} · MC ${esc(v.mc)} · ${esc(v.loaders.join("/"))}${v.tipo!=="release"?" ("+esc(v.tipo)+")":""}</option>`).join("")}</select>
       <input data-k="n" maxlength="30" value="${esc(fila.dataset.ti.slice(0,30))}" title="Nombre de la instancia">
-      <select data-k="r" title="Memoria RAM"><option value="4">4 GB</option><option value="6" selected>6 GB</option><option value="8">8 GB</option></select>
+      <input data-k="r" type="number" min="0.5" step="0.5" value="${Math.max(rd.ram,6)}" title="Memoria RAM (GB)">
       <button class="mini" data-a="ok">Instalar modpack</button><button class="mini sec" data-a="no">Cancelar</button>`;
     box.classList.remove("ocu");b.classList.add("ocu");
   }else if(a==="inst")await instalarContenido(b,fila,"");
@@ -735,7 +1130,7 @@ $("#p-res").onclick=async e=>{
   }else if(a==="okm")await instalarContenido(btn0,fila,box.querySelector('[data-k="w"]').value);
   else if(a==="no"){box.classList.add("ocu");btn0.classList.remove("ocu")}
   else if(a==="ok"){
-    const v=box.querySelector('[data-k="v"]').value,n=box.querySelector('[data-k="n"]').value.trim(),ram=box.querySelector('[data-k="r"]').value;
+    const v=box.querySelector('[data-k="v"]').value,n=box.querySelector('[data-k="n"]').value.trim(),ram=box.querySelector('[data-k="r"]').value.replace(",",".");
     pBloquear(true);pInfo("Preparando…");
     const r=await api().modpack_instalar(v,n,ram,pFuente,fila.dataset.id);if(!r.ok){pBloquear(false);pInfo(r.error,true)}
   }
@@ -764,7 +1159,7 @@ $("#m-lista").onclick=async e=>{
   const b=e.target.closest("[data-a]");if(!b||!api())return;
   const f=b.closest(".mod").dataset.f,nom=modsInst,a=b.dataset.a;let msg="";
   if(a==="act"){const r=await api().mod_activar(nom,f,!b.classList.contains("on"));if(!r.ok)mInfo(r.error,true)}
-  else if(a==="del"){if(!confirm(`¿Eliminar '${f}' de la instancia?`))return;const r=await api().mod_borrar(nom,f);if(!r.ok)mInfo(r.error,true)}
+  else if(a==="del"){if(!await confirmarAviso({titulo:`¿Eliminar «${f}»?`,detalle:"Se borra el archivo de esta instancia."}))return;const r=await api().mod_borrar(nom,f);if(!r.ok)return notificar(r.error||"No se pudo eliminar el mod.","error");notificar("Mod eliminado")}
   else if(a==="upd"){
     const u=modsUpd[f];if(!u)return;b.disabled=true;b.textContent="Actualizando…";
     const r=await api().modrinth_actualizar(nom,f,u.version_id);
@@ -802,15 +1197,6 @@ $("#p-imp").onclick=async()=>{
   const r=await api().modpack_importar_dialogo();
   if(!r.ok){pBloquear(false);pInfo(r.cancelado?"":r.error,!r.cancelado)}
 };
-async function pintarCF(){
-  if(!api())return;const r=await api().curseforge_estado(),m=$("#cf-msg");m.classList.remove("err");
-  m.textContent=r.clave?"Clave guardada ✓":"Todavía no hay clave: sin ella no se puede usar CurseForge."}
-async function cfGuardar(valor){
-  const r=await api().config_guardar("curseforge_key",valor),m=$("#cf-msg");
-  if(!r.ok){m.classList.add("err");m.textContent=r.error;return}
-  $("#cf-key").value="";pintarCF()}
-$("#cf-guardar").onclick=()=>{const v=$("#cf-key").value.trim();if(v&&api())cfGuardar(v)};
-$("#cf-quitar").onclick=()=>{if(api())cfGuardar("")};
 window.onProgresoPack=p=>{pInfo(p.estado);const pc=(p.max?Math.round(p.valor/p.max*100):0)+"%";$("#p-barra i").style.width=pc;
   if($("#up-modal").classList.contains("on")){$("#up-est").textContent=p.estado;$("#up-est").classList.remove("err");$("#up-barra i").style.width=pc}};
 window.onPackError=m=>{pBloquear(false);

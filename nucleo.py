@@ -11,7 +11,7 @@ Estructura en disco (igual que Prism / Modrinth App):
 Las instancias viejas (sin campo "carpeta") siguen usando .domeLauncher como carpeta de juego,
 así no se pierde ningún mundo ni configuración.
 """
-import os, re, json, shutil, subprocess, sys, zipfile
+import os, re, json, shutil, subprocess, sys, time, zipfile
 try:
     import tomllib            # Python 3.11+
 except ImportError:           # Python más viejo: se lee el .toml con expresiones regulares
@@ -93,8 +93,19 @@ def _clave(v):
     return tuple(int(x) for x in re.findall(r"\d+", v))
 
 
+_cache_versiones = {}      # tipo -> (momento, lista): abrir «Nueva instancia» es instantáneo la 2ª vez
+
+
 def versiones(tipo):
-    """Releases de Minecraft, nuevas primero. Con un loader, solo las que ese loader puede instalar."""
+    """Releases de Minecraft, nuevas primero (copia de 10 min). Con un loader, solo las que ese loader puede instalar."""
+    ahora = time.time()
+    if tipo in _cache_versiones and ahora - _cache_versiones[tipo][0] < 600: return list(_cache_versiones[tipo][1])
+    res = _versiones(tipo)
+    _cache_versiones[tipo] = (ahora, res)
+    return list(res)
+
+
+def _versiones(tipo):
     lista = [v["id"] for v in mll.utils.get_version_list() if v["type"] == "release"]
     if tipo in LOADERS:
         loader = mll.mod_loader.get_mod_loader(LOADERS[tipo])
@@ -160,12 +171,24 @@ def reparar_version_id(d):
 
 
 # -------------------------------------------------------------- lanzar
-def comando_jugar(d, usuario, cfg):
-    """Devuelve (comando, carpeta_de_juego) para lanzar la instancia."""
-    ram = d.get("ram", "4")
-    jvm = [f"-Xmx{ram}G", f"-Xms{ram}G"] + (d.get("custom_jvm_args") or cfg.get("argumentos_jvm", "")).split()
+def ram_mb(d):
+    """RAM de la instancia en MB (acepta decimales: '6.5' = 6656 MB)."""
+    try: gb = float(str(d.get("ram", "4")).replace(",", "."))
+    except ValueError: gb = 4.0
+    return max(512, int(round(gb * 1024)))
+
+
+def comando_jugar(d, usuario, cfg, sesion=None, rend=None):
+    """Devuelve (comando, carpeta_de_juego) para lanzar la instancia.
+    sesion = {"name","uuid","token"} de una cuenta premium; si es None se juega sin conexión con el nombre dado."""
+    rend = rend or {}
+    xmx = ram_mb(d)
+    xms = min(xmx, rend["xms_mb"]) if rend.get("xms_mb") else xmx
+    jvm = [f"-Xmx{xmx}M", f"-Xms{xms}M"] + list(rend.get("flags") or []) + (d.get("custom_jvm_args") or cfg.get("argumentos_jvm", "")).split()
     juego = preparar_carpeta(d)
-    op = {"username": usuario, "uuid": "00000000-0000-0000-0000-000000000000", "token": "00000000",
+    if sesion: usuario, uid, token = sesion["name"], sesion["uuid"], sesion["token"]
+    else: uid, token = "00000000-0000-0000-0000-000000000000", "00000000"
+    op = {"username": usuario, "uuid": uid, "token": token,
           "jvmArguments": jvm, "launcherVersion": "2.0.0", "gameDirectory": juego,
           "width": d.get("resolution_w", "854"), "height": d.get("resolution_h", "480")}
     java = d.get("java_executable")

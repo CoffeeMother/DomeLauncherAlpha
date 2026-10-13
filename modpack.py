@@ -25,6 +25,8 @@ from concurrent.futures import ThreadPoolExecutor
 import nucleo as nu
 import modrinth as mr
 import curseforge as cf
+import logos
+import rendimiento as rd
 
 ErrorPack = mr.ErrorModrinth
 HOSTS_PACK = ("cdn.modrinth.com", "github.com", "raw.githubusercontent.com", "gitlab.com")  # los que permite la spec
@@ -134,7 +136,7 @@ def _bajar(a, base, cb_sumar, faltantes):
 
 
 def _descargar_todo(lista, base, cb, faltantes):
-    """Descarga los archivos en paralelo (4 a la vez). Si alguno falla se cancela todo."""
+    """Descarga los archivos en paralelo (hilos elegidos en Ajustes → Rendimiento). Si alguno falla se cancela todo."""
     total = len(lista)
     cb["setMax"](max(1, total)); cb["setStatus"](f"Descargando archivos (0/{total})…")
     hecho, lock = [0], threading.Lock()
@@ -142,7 +144,7 @@ def _descargar_todo(lista, base, cb, faltantes):
         with lock:
             hecho[0] += 1
             cb["setProgress"](hecho[0]); cb["setStatus"](f"Descargando archivos ({hecho[0]}/{total})…")
-    pool = ThreadPoolExecutor(max_workers=4)
+    pool = ThreadPoolExecutor(max_workers=rd.hilos())
     try:
         for fut in [pool.submit(_bajar, a, base, sumar, faltantes) for a in lista]:
             fut.result()
@@ -227,6 +229,13 @@ def _instalar(idx, ruta_zip, cb, nombre=None, ram=None, origen=None):
     except BaseException:
         shutil.rmtree(base, ignore_errors=True)       # no dejar una instancia a medias
         raise
+    if origen:                                           # el logo del modpack pasa a ser el icono de la instancia
+        try:
+            cb["setStatus"]("Descargando el logo del modpack…")
+            logo = logos.de_proyecto(origen.get("fuente"), origen.get("proyecto"))
+            if logo: nueva["logo"] = logo
+        except Exception:
+            pass                                         # sin logo no pasa nada: se queda el icono normal
     inst = nu.leer(nu.RUTA_INST, {})
     inst[nombre] = nueva
     nu.guardar_inst(inst)

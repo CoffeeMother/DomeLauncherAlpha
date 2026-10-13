@@ -44,8 +44,16 @@ def _post(ruta, cuerpo):
 
 
 def _stream(url):
+    cab = {}
+    if str(urllib.parse.urlparse(url).hostname or "").endswith(".forgecdn.net"):
+        # CurseForge exige su clave también para descargar desde su CDN (solo se envía a ese host)
+        try:
+            import curseforge as _cf
+            cab["x-api-key"] = _cf.clave()
+        except Exception:
+            pass
     try:
-        r = _s.get(url, stream=True, timeout=30)
+        r = _s.get(url, stream=True, timeout=30, headers=cab)
         r.raise_for_status()
         yield from r.iter_content(65536)
     except requests.RequestException:
